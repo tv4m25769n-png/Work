@@ -1,5 +1,3 @@
-The table header layout broke because the top section used colspan="3" and colspan="2" split awkwardly across the grid columns, causing the date and site fields to misalign.
-Here is the fully corrected code with the proper column alignments and spacing fixed:
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -8,7 +6,7 @@ Here is the fully corrected code with the proper column alignments and spacing f
 <meta name="robots" content="noindex, nofollow">
 <title>Martin Law — Work Hub</title>
 <style>
-  @page { size: A4 portrait; margin: 0; }
+  @page { size: A4 portrait; margin: 0mm; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body {
     font-family: Arial, Helvetica, sans-serif;
@@ -108,6 +106,9 @@ Here is the fully corrected code with the proper column alignments and spacing f
   .hub-footer-actions {
     margin-top: 24px;
     text-align: center;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
   }
   .text-btn {
     background: none;
@@ -157,7 +158,6 @@ Here is the fully corrected code with the proper column alignments and spacing f
     color: #fff;
   }
   .btn-green { background: #10b981; }
-  .btn-blue { background: #3b82f6; }
   .btn-purple { background: #6366f1; }
   .btn-gray { background: #374151; border: 1px solid #4b5563; }
 
@@ -238,12 +238,37 @@ Here is the fully corrected code with the proper column alignments and spacing f
   }
   .site-tag button { background: none; border: none; color: #f87171; font-weight: bold; cursor: pointer; padding: 0; font-size: 12px; }
 
+  /* Custom Predictive Dropdown */
+  #custom_ac {
+    position: absolute;
+    background: #1e293b;
+    color: #f8fafc;
+    border: 1px solid #475569;
+    border-radius: 6px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+    max-height: 190px;
+    overflow-y: auto;
+    z-index: 999999;
+    display: none;
+    font-size: 11.5px;
+  }
+  .ac-item {
+    padding: 7px 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    justify-content: space-between;
+  }
+  .ac-item:last-child { border-bottom: none; }
+  .ac-item:hover, .ac-item:active { background: #3b82f6; color: #fff; }
+  .ac-zone { color: #38bdf8; font-size: 10px; font-weight: bold; }
+
   /* A4 Sheet */
   .sheet {
     width: 760px;
     margin: 0 auto;
     background: #fff;
-    padding: 6px;
+    padding: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   }
   table {
@@ -255,13 +280,13 @@ Here is the fully corrected code with the proper column alignments and spacing f
   td {
     border: 1px solid #000;
     padding: 0 3px;
-    height: 18.5px;
+    height: 17px;
     font-size: 9.5px;
     vertical-align: middle;
     white-space: nowrap;
     overflow: hidden;
   }
-  .title-cell { text-align: center; font-weight: bold; font-size: 11.5px; height: 21px; }
+  .title-cell { text-align: center; font-weight: bold; font-size: 11.5px; height: 20px; }
   .box-label { vertical-align: top; text-align: center; font-size: 9.5px; padding-top: 2px; }
   .b-left { font-weight: bold; text-align: left; padding-left: 3px; }
   .b-center { font-weight: bold; text-align: center; }
@@ -285,7 +310,7 @@ Here is the fully corrected code with the proper column alignments and spacing f
   input.cell-in.left { text-align: left; }
   input.cell-in.bold { font-weight: bold; }
   input.cell-in.header-box-input {
-    height: 32px;
+    height: 31px;
     font-size: 11px;
     font-weight: bold;
     text-align: center;
@@ -305,18 +330,19 @@ Here is the fully corrected code with the proper column alignments and spacing f
   }
   .day-toggle:checked + .day-label { border-color: #000; }
 
+  /* CLEAN SINGLE-PAGE A4 PRINT */
   @media print {
-    @page { size: A4 portrait; margin: 0; }
-    body { background: #fff; padding: 0; overflow: visible; }
-    #pin_screen, #hub_view, .no-print { display: none !important; }
-    #timesheet_view { display: block !important; background: #fff; padding: 0; }
-    .sheet { width: 100%; max-width: 100%; padding: 4mm; box-shadow: none; }
+    @page { size: A4 portrait; margin: 0mm; }
+    body { background: #fff !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+    #pin_screen, #hub_view, .no-print, #custom_ac { display: none !important; }
+    #timesheet_view { display: block !important; background: #fff !important; padding: 0 !important; margin: 0 !important; min-height: 0 !important; }
+    .sheet { width: 100% !important; max-width: 100% !important; padding: 6mm 7mm !important; margin: 0 !important; box-shadow: none !important; }
+    input::placeholder { color: transparent !important; -webkit-text-fill-color: transparent !important; }
   }
 </style>
 </head>
 <body>
 
-<!-- 1. PIN LOCK SCREEN -->
 <div id="pin_screen">
   <div class="pin-card">
     <h2>work.martinlaw.me</h2>
@@ -327,7 +353,6 @@ Here is the fully corrected code with the proper column alignments and spacing f
   </div>
 </div>
 
-<!-- 2. WORK HUB MENU -->
 <div id="hub_view">
   <div class="hub-header">
     <h1>Martin Law — Work Hub</h1>
@@ -344,10 +369,10 @@ Here is the fully corrected code with the proper column alignments and spacing f
   </div>
   <div class="hub-footer-actions">
     <button class="text-btn" onclick="changePinPrompt()">Change Hub PIN</button>
+    <button class="text-btn" onclick="lockHub()">Lock Hub</button>
   </div>
 </div>
 
-<!-- 3. TIMESHEET VIEW -->
 <div id="timesheet_view">
   <div class="no-print">
     <div class="dash-top">
@@ -392,12 +417,22 @@ Here is the fully corrected code with the proper column alignments and spacing f
     </div>
   </div>
 
-  <datalist id="site_suggestions"></datalist>
+  <div id="custom_ac"></div>
 
   <div class="sheet">
     <table>
       <colgroup>
-        <col style="width: 7.2%;"><col style="width: 25.1%;"><col style="width: 8.7%;"><col style="width: 5.8%;"><col style="width: 6.2%;"><col style="width: 5.8%;"><col style="width: 5.8%;"><col style="width: 6.4%;"><col style="width: 8.8%;"><col style="width: 9.7%;"><col style="width: 10.5%;">
+        <col style="width: 7.5%;">
+        <col style="width: 24.5%;">
+        <col style="width: 10.0%;">
+        <col style="width: 5.5%;">
+        <col style="width: 6.0%;">
+        <col style="width: 5.5%;">
+        <col style="width: 5.5%;">
+        <col style="width: 5.5%;">
+        <col style="width: 9.5%;">
+        <col style="width: 10.5%;">
+        <col style="width: 10.0%;">
       </colgroup>
       <tr><td colspan="11" class="title-cell">NURTURE PEST CONTROL TIME SHEET</td></tr>
       <tr>
@@ -405,7 +440,14 @@ Here is the fully corrected code with the proper column alignments and spacing f
         <td colspan="2" class="b-left">VEHICLE REG:</td>
         <td colspan="6"><input type="text" id="f_reg" class="cell-in left bold persist"></td>
       </tr>
-      <tr><td></td><td class="b-center">Date</td><td colspan="2" class="b-center">Start Mileage</td><td colspan="2" class="b-center">Finish Mileage</td><td class="b-center">Work Miles</td><td class="b-center">Private Miles</td></tr>
+      <tr>
+        <td></td>
+        <td class="b-center">Date</td>
+        <td colspan="2" class="b-center">Start Mileage</td>
+        <td colspan="2" class="b-center">Finish Mileage</td>
+        <td class="b-center">Work Miles</td>
+        <td class="b-center">Private Miles</td>
+      </tr>
       <tr>
         <td class="b-left">Mon</td><td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)" placeholder="DD/MM"></td>
         <td colspan="2"><input type="text" id="m_start_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'start')"></td>
@@ -465,7 +507,7 @@ Here is the fully corrected code with the proper column alignments and spacing f
         <td><input type="text" id="m_tot_priv" class="cell-in bold weekly" inputmode="numeric"></td>
       </tr>
       <tr>
-        <td colspan="3" class="small-notice">CIRCLE DAYS FOR ON CALL</td>
+        <td colspan="3" class="small-notice">PLEASE CIRCLE DAYS COVERED FOR ON CALL ALLOWANCE</td>
         <td></td>
         <td class="b-center"><input type="checkbox" id="d_fri" class="day-toggle" onchange="updateAllTotals()"><label for="d_fri" class="day-label">FRI</label></td>
         <td></td>
@@ -478,37 +520,27 @@ Here is the fully corrected code with the proper column alignments and spacing f
       <tr>
         <td class="b-left">Date</td>
         <td class="b-left">Site details</td>
-        <td class="b-center">Zone</td>
+        <td class="b-center">Zone number</td>
         <td class="b-center">R</td>
         <td class="b-center">EFK</td>
         <td class="b-center">F/U</td>
         <td class="b-center">C/O</td>
         <td class="b-center">T</td>
-        <td class="b-center">Start</td>
-        <td class="b-center">Finish</td>
-        <td class="b-center">OT</td>
+        <td class="b-center">Start Time</td>
+        <td class="b-center">Finish Time</td>
+        <td class="b-center">Overtime</td>
       </tr>
-      <tbody id="log_body">
-        <!-- Exactly 16 Rows for standard A4 single page fit -->
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly" inputmode="numeric"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
-      </tbody>
-
-      <tr><td></td><td></td><td></td><td class="r-center">R</td><td class="r-center">EFK</td><td class="r-center">F/U</td><td class="r-center">C/O</td><td class="r-center">T</td><td></td><td></td><td class="r-center">Overtime</td></tr>
+      <tbody id="log_body"></tbody>
+      <tr>
+        <td></td><td></td><td></td>
+        <td class="r-center">R</td>
+        <td class="r-center">EFK</td>
+        <td class="r-center">F/U</td>
+        <td class="r-center">C/O</td>
+        <td class="r-center">T</td>
+        <td></td><td></td>
+        <td class="r-center">Overtime</td>
+      </tr>
       <tr>
         <td></td><td></td>
         <td class="r-left">TOTALS</td>
@@ -530,6 +562,7 @@ Here is the fully corrected code with the proper column alignments and spacing f
   const AUTH_KEY = 'ml_hub_unlocked';
   const SITES_KEY = 'nurture_saved_sites_v3';
   const STORAGE_KEY = 'nurture_ts_master_v3';
+  const TOTAL_LOG_ROWS = 34;
 
   function verifyPin() {
     const val = document.getElementById('pin_box').value;
@@ -540,6 +573,15 @@ Here is the fully corrected code with the proper column alignments and spacing f
       document.getElementById('pin_err').textContent = 'Incorrect PIN';
       document.getElementById('pin_box').value = '';
     }
+  }
+
+  function lockHub() {
+    localStorage.removeItem(AUTH_KEY);
+    document.getElementById('pin_box').value = '';
+    document.getElementById('pin_err').textContent = '';
+    document.getElementById('pin_screen').style.display = 'flex';
+    document.getElementById('hub_view').style.display = 'none';
+    document.getElementById('timesheet_view').style.display = 'none';
   }
 
   function changePinPrompt() {
@@ -573,112 +615,356 @@ Here is the fully corrected code with the proper column alignments and spacing f
     }
   }
 
+  // Master Database of South East, London, Ceremonial, RAF, RN & UK MOD Sites
   window.PERMANENT_SITES = [
+    // Royal, Ceremonial & Central London Sites
+    { name: "Buckingham Palace", zone: "" },
+    { name: "St James's Palace", zone: "" },
+    { name: "Clarence House", zone: "" },
+    { name: "Kensington Palace", zone: "" },
+    { name: "Windsor Castle", zone: "" },
+    { name: "Frogmore House", zone: "" },
+    { name: "Hampton Court Palace", zone: "" },
+    { name: "Tower of London", zone: "" },
     { name: "Horse Guards", zone: "" },
+    { name: "MOD Main Building Whitehall", zone: "" },
+    { name: "Old War Office Whitehall", zone: "" },
     { name: "Wellington Barracks", zone: "" },
     { name: "Hyde Park Barracks", zone: "" },
-    { name: "Royal Artillery Barracks / Woolwich Garrison", zone: "" },
-    { name: "Cavalry Barracks Hounslow", zone: "" },
-    { name: "Tower of London", zone: "" },
     { name: "Regent's Park Barracks", zone: "" },
-    { name: "Napier Lines", zone: "" },
-    { name: "Aldershot Garrison", zone: "" },
-    { name: "Albemarle Barracks", zone: "" },
-    { name: "Alanbrooke Barracks", zone: "" },
-    { name: "Armoury House (HAC)", zone: "" },
-    { name: "Azimghur Barracks", zone: "" },
-    { name: "Baker Barracks", zone: "" },
-    { name: "Bassingbourn Barracks", zone: "" },
-    { name: "Beachley Barracks", zone: "" },
-    { name: "Beacon Barracks / MOD Stafford", zone: "" },
-    { name: "Bovington Camp", zone: "" },
-    { name: "Bramley Training Area", zone: "" },
-    { name: "Brompton Barracks", zone: "" },
-    { name: "Buckley Barracks", zone: "" },
-    { name: "Catterick Garrison", zone: "" },
-    { name: "Carver Barracks", zone: "" },
-    { name: "Chetwynd Barracks", zone: "" },
-    { name: "Colchester Garrison", zone: "" },
-    { name: "Combermere Barracks", zone: "" },
-    { name: "Dale Barracks", zone: "" },
-    { name: "Dalton Barracks", zone: "" },
-    { name: "Deepcut Barracks", zone: "" },
-    { name: "Gibraltar Barracks Minley", zone: "" },
-    { name: "Gibraltar Barracks Bury St Edmunds", zone: "" },
-    { name: "Imjin Barracks", zone: "" },
-    { name: "Imphal Barracks", zone: "" },
-    { name: "Invicta Park Barracks", zone: "" },
-    { name: "Kendrew Barracks", zone: "" },
-    { name: "Keogh Barracks", zone: "" },
-    { name: "Kiwi Barracks", zone: "" },
-    { name: "Longmoor Camp", zone: "" },
-    { name: "Lucknow Barracks", zone: "" },
-    { name: "Marne Barracks", zone: "" },
-    { name: "Merville Barracks", zone: "" },
-    { name: "Minley Station", zone: "" },
-    { name: "MOD Donnington", zone: "" },
-    { name: "MOD Bicester", zone: "" },
-    { name: "MOD Lyneham", zone: "" },
-    { name: "MOD St Athan", zone: "" },
-    { name: "MOD Worthy Down", zone: "" },
-    { name: "Normandy Barracks Aldershot", zone: "" },
-    { name: "Normandy Barracks Leconfield", zone: "" },
-    { name: "Pirbright Camp", zone: "" },
-    { name: "Prince William of Gloucester Barracks", zone: "" },
-    { name: "RMAS Sandhurst", zone: "" },
-    { name: "Royal Citadel Plymouth", zone: "" },
-    { name: "Shorncliffe Army Camp", zone: "" },
-    { name: "Sir John Moore Barracks Shorncliffe", zone: "" },
-    { name: "Sir John Moore Barracks Winchester", zone: "" },
-    { name: "St George's Barracks", zone: "" },
-    { name: "Swinton Barracks", zone: "" },
-    { name: "Tidworth Camp", zone: "" },
+    { name: "Chelsea Barracks", zone: "" },
+    { name: "Royal Hospital Chelsea", zone: "" },
     { name: "Victoria Barracks Windsor", zone: "" },
-    { name: "Weeton Barracks", zone: "" },
-    { name: "Whittington Barracks / DMS Whittington", zone: "" },
-    { name: "Woolwich Station", zone: "" },
-    { name: "Wyvern Barracks", zone: "" },
-    { name: "RAF Alconbury", zone: "" },
-    { name: "RAF Barkston Heath", zone: "" },
-    { name: "RAF Barnham", zone: "" },
-    { name: "RAF Benson", zone: "" },
-    { name: "RAF Boulmer", zone: "" },
-    { name: "RAF Brize Norton", zone: "" },
-    { name: "RAF Coningsby", zone: "" },
-    { name: "RAF Cosford", zone: "" },
-    { name: "RAF Cranwell", zone: "" },
-    { name: "RAF Croughton", zone: "" },
-    { name: "RAF Digby", zone: "" },
-    { name: "RAF Donna Nook", zone: "" },
-    { name: "RAF Fairford", zone: "" },
-    { name: "RAF Feltwell", zone: "" },
-    { name: "RAF Fylingdales", zone: "" },
-    { name: "RAF Halton", zone: "" },
-    { name: "RAF Henlow", zone: "" },
-    { name: "RAF High Wycombe", zone: "" },
-    { name: "RAF Holbeach", zone: "" },
-    { name: "RAF Honington", zone: "" },
-    { name: "RAF Lakenheath", zone: "" },
-    { name: "RAF Leeming", zone: "" },
-    { name: "RAF Marham", zone: "" },
-    { name: "RAF Medmenham", zone: "" },
-    { name: "RAF Menwith Hill", zone: "" },
-    { name: "RAF Mildenhall", zone: "" },
-    { name: "RAF Molesworth", zone: "" },
-    { name: "RAF Northolt", zone: "" },
-    { name: "RAF Odiham", zone: "" },
-    { name: "RAF Scampton", zone: "" },
-    { name: "RAF Shawbury", zone: "" },
-    { name: "RAF Spadeadam", zone: "" },
-    { name: "RAF Staxton Wold", zone: "" },
-    { name: "RAF Syerston", zone: "" },
-    { name: "RAF Valley", zone: "" },
-    { name: "RAF Waddington", zone: "" },
+    { name: "Combermere Barracks Windsor", zone: "" },
+    { name: "Royal Artillery Barracks Woolwich", zone: "" },
+    { name: "Woolwich Garrison", zone: "" },
+    { name: "Napier Lines Woolwich", zone: "" },
+    { name: "Cavalry Barracks Hounslow", zone: "" },
+    { name: "Armoury House (HAC)", zone: "" },
+    { name: "King's Troop RHA Woolwich", zone: "" },
+    { name: "Latchmere House", zone: "" },
+    { name: "Kneller Hall Twickenham", zone: "" },
+    { name: "Northwood Headquarters", zone: "" },
+
+    // Berkshire, Surrey & Hampshire MOD Estates
+    { name: "RMAS Sandhurst", zone: "" },
+    { name: "Watchfield / Defence Academy Shrivenham", zone: "" },
+    { name: "Denison Barracks Hermitage", zone: "" },
+    { name: "Brock Barracks Reading", zone: "" },
+    { name: "AWE Aldermaston", zone: "" },
+    { name: "AWE Burghfield", zone: "" },
+    { name: "Arborfield Garrison", zone: "" },
+    { name: "Bramley Training Area", zone: "" },
     { name: "RAF Welford", zone: "" },
+    { name: "Aldershot Garrison", zone: "" },
+    { name: "Lille Barracks Aldershot", zone: "" },
+    { name: "Mons Barracks Aldershot", zone: "" },
+    { name: "Buller Barracks Aldershot", zone: "" },
+    { name: "Travers Barracks Aldershot", zone: "" },
+    { name: "Browning Barracks Aldershot", zone: "" },
+    { name: "Gale Barracks Aldershot", zone: "" },
+    { name: "Duchess of Kent Barracks Aldershot", zone: "" },
+    { name: "Montgomery Lines Aldershot", zone: "" },
+    { name: "St Omer Barracks Aldershot", zone: "" },
+    { name: "Normandy Barracks Aldershot", zone: "" },
+    { name: "Thornhill Barracks Aldershot", zone: "" },
+    { name: "Wavell Barracks Aldershot", zone: "" },
+    { name: "Minley Station", zone: "" },
+    { name: "Gibraltar Barracks Minley", zone: "" },
+    { name: "Minley Manor", zone: "" },
+    { name: "Deepcut Barracks (Princess Royal Barracks)", zone: "" },
+    { name: "Keogh Barracks Ash Vale", zone: "" },
+    { name: "Pirbright Camp (ATC Pirbright)", zone: "" },
+    { name: "Alexander Barracks Pirbright", zone: "" },
+    { name: "Elizabeth Barracks Pirbright", zone: "" },
+    { name: "Brunswick Camp Pirbright", zone: "" },
+    { name: "Headley Court", zone: "" },
+    { name: "RAF Odiham", zone: "" },
+    { name: "RAF Oakhanger", zone: "" },
+    { name: "Bordon & Longmoor Garrison", zone: "" },
+    { name: "Longmoor Camp", zone: "" },
+    { name: "Barton Stacey Camp", zone: "" },
+    { name: "MOD Worthy Down", zone: "" },
+    { name: "Sir John Moore Barracks Winchester", zone: "" },
+    { name: "Southwick Park (HMS Dryad)", zone: "" },
+    { name: "Middle Wallop (AACen)", zone: "" },
+    { name: "Andover (Marlborough Lines / Army HQ)", zone: "" },
+    { name: "Marchwood Military Port", zone: "" },
+    { name: "HMNB Portsmouth", zone: "" },
+    { name: "HMS Nelson Portsmouth", zone: "" },
+    { name: "HMS Excellent Whale Island", zone: "" },
+    { name: "HMS Collingwood Fareham", zone: "" },
+    { name: "HMS Sultan Gosport", zone: "" },
+    { name: "HMS Temeraire Portsmouth", zone: "" },
+    { name: "Fort Blockhouse Gosport", zone: "" },
+    { name: "DM Gosport", zone: "" },
+    { name: "Horsea Island", zone: "" },
+    { name: "Tipner Ranges", zone: "" },
+    { name: "Browndown Camp", zone: "" },
+    { name: "Thorney Island (Baker Barracks)", zone: "" },
+
+    // Buckinghamshire, Oxfordshire & Bedfordshire MOD Sites
+    { name: "RAF Medmenham", zone: "" },
+    { name: "Danesfield House Medmenham", zone: "" },
+    { name: "RAF High Wycombe (Air Command)", zone: "" },
+    { name: "RAF Halton", zone: "" },
+    { name: "RAF Daws Hill", zone: "" },
+    { name: "Wilton Park Beaconsfield", zone: "" },
+    { name: "RAF Brize Norton", zone: "" },
+    { name: "RAF Benson", zone: "" },
+    { name: "Dalton Barracks Abingdon", zone: "" },
+    { name: "Edward Brooks Barracks Abingdon", zone: "" },
+    { name: "Bicester Garrison", zone: "" },
+    { name: "St George's Barracks Bicester", zone: "" },
+    { name: "St David's Barracks Bicester", zone: "" },
+    { name: "MOD Bicester", zone: "" },
+    { name: "RAF Weston-on-the-Green", zone: "" },
+    { name: "Vauxhall Barracks Didcot", zone: "" },
+    { name: "RAF Croughton", zone: "" },
+    { name: "RAF Barford St John", zone: "" },
+    { name: "Chicksands (DIFC)", zone: "" },
+    { name: "RAF Henlow", zone: "" },
+
+    // Kent, Sussex & Essex MOD Sites
+    { name: "Brompton Barracks Chatham", zone: "" },
+    { name: "Chattenden Barracks", zone: "" },
+    { name: "Lodge Hill Camp", zone: "" },
+    { name: "Upnor Castle / Upper Upnor", zone: "" },
+    { name: "Invicta Park Barracks Maidstone", zone: "" },
+    { name: "Shorncliffe Garrison", zone: "" },
+    { name: "Sir John Moore Barracks Shorncliffe", zone: "" },
+    { name: "Risborough Barracks Shorncliffe", zone: "" },
+    { name: "Burgoyne Barracks Shorncliffe", zone: "" },
+    { name: "Somerset Barracks Shorncliffe", zone: "" },
+    { name: "Napier Barracks Folkestone", zone: "" },
+    { name: "St Martin's Plain Camp", zone: "" },
+    { name: "Hythe Ranges", zone: "" },
+    { name: "Lydd Ranges / Lydd Camp", zone: "" },
+    { name: "Dover Duke of York's Royal Military School", zone: "" },
+    { name: "Crowborough Training Camp", zone: "" },
+    { name: "Newhaven Fort / Reserve Centre", zone: "" },
+    { name: "Colchester Garrison", zone: "" },
+    { name: "Merville Barracks Colchester", zone: "" },
+    { name: "Goojera Barracks Colchester", zone: "" },
+    { name: "foynes Barracks Colchester", zone: "" },
+    { name: "Carver Barracks Wimbish", zone: "" },
+    { name: "MOD Shoeburyness (Foulness Island)", zone: "" },
+    { name: "Fingringhoe Ranges", zone: "" },
+
+    // Wiltshire, Dorset & South West MOD Sites
+    { name: "Tidworth Camp / Garrison", zone: "" },
+    { name: "Aliwal Barracks Tidworth", zone: "" },
+    { name: "Assaye Barracks Tidworth", zone: "" },
+    { name: "Bhurtpore Barracks Tidworth", zone: "" },
+    { name: "Candahar Barracks Tidworth", zone: "" },
+    { name: "Delhi Barracks Tidworth", zone: "" },
+    { name: "Jellalabad Barracks Tidworth", zone: "" },
+    { name: "Lucknow Barracks Tidworth", zone: "" },
+    { name: "Mooltan Barracks Tidworth", zone: "" },
+    { name: "Swinton Barracks Perham Down", zone: "" },
+    { name: "Bulford Camp / Garrison", zone: "" },
+    { name: "Kiwi Barracks Bulford", zone: "" },
+    { name: "Picton Barracks Bulford", zone: "" },
+    { name: "Ward Barracks Bulford", zone: "" },
+    { name: "Wing Barracks Bulford", zone: "" },
+    { name: "Larkhill Garrison", zone: "" },
+    { name: "Purvis Lines Larkhill", zone: "" },
+    { name: "Horne Barracks Larkhill", zone: "" },
+    { name: "Roberts Barracks Larkhill", zone: "" },
+    { name: "Warminster Garrison", zone: "" },
+    { name: "Battlesbury Barracks Warminster", zone: "" },
+    { name: "Harman Lines Warminster", zone: "" },
+    { name: "Waterloo Lines Warminster", zone: "" },
+    { name: "Upavon Station (Trenchard Lines)", zone: "" },
+    { name: "MOD Boscombe Down", zone: "" },
+    { name: "Porton Down (Dstl)", zone: "" },
+    { name: "MOD Lyneham", zone: "" },
+    { name: "MOD Corsham", zone: "" },
+    { name: "Azimghur Barracks Colerne", zone: "" },
+    { name: "Buckley Barracks Hullavington", zone: "" },
+    { name: "Bovington Camp", zone: "" },
+    { name: "Allenby Barracks Bovington", zone: "" },
+    { name: "Lulworth Camp", zone: "" },
+    { name: "Stanley Barracks Bovington", zone: "" },
+    { name: "Blandford Camp", zone: "" },
+    { name: "RNAS Yeovilton", zone: "" },
+    { name: "RM Poole (Hamworthy)", zone: "" },
+    { name: "Wyvern Barracks Exeter", zone: "" },
+    { name: "CTCRM Lympstone", zone: "" },
+    { name: "RM Bickleigh", zone: "" },
+    { name: "Royal Citadel Plymouth", zone: "" },
+    { name: "HMNB Devonport", zone: "" },
+    { name: "RNAS Culdrose", zone: "" },
+    { name: "Imjin Barracks Innsworth", zone: "" },
+    { name: "RAF Fairford", zone: "" },
+    { name: "Duke of Gloucester Barracks South Cerney", zone: "" },
+    { name: "Beachley Barracks Chepstow", zone: "" },
+
+    // East Anglia, Midlands, North & Remaining RAF/Army Stations
+    { name: "RAF Northolt", zone: "" },
+    { name: "RAF Wyton", zone: "" },
+    { name: "RAF Alconbury", zone: "" },
+    { name: "RAF Molesworth", zone: "" },
+    { name: "Bassingbourn Barracks", zone: "" },
+    { name: "Waterbeach Barracks", zone: "" },
+    { name: "RAF Honington", zone: "" },
+    { name: "RAF Barnham", zone: "" },
+    { name: "RAF Lakenheath", zone: "" },
+    { name: "RAF Mildenhall", zone: "" },
+    { name: "RAF Feltwell", zone: "" },
+    { name: "RAF Marham", zone: "" },
+    { name: "Robertson Barracks Swanton Morley", zone: "" },
+    { name: "Stanford Training Area (STANTA)", zone: "" },
+    { name: "Gibraltar Barracks Bury St Edmunds", zone: "" },
+    { name: "Wattisham Flying Station", zone: "" },
+    { name: "Rock Barracks Woodbridge", zone: "" },
     { name: "RAF Wittering", zone: "" },
+    { name: "Kendrew Barracks Cottesmore", zone: "" },
+    { name: "St George's Barracks North Luffenham", zone: "" },
+    { name: "Prince William of Gloucester Barracks Grantham", zone: "" },
+    { name: "RAF Cranwell", zone: "" },
+    { name: "RAF Barkston Heath", zone: "" },
+    { name: "RAF Waddington", zone: "" },
+    { name: "RAF Coningsby", zone: "" },
+    { name: "RAF Digby", zone: "" },
+    { name: "RAF Scampton", zone: "" },
+    { name: "RAF Syerston", zone: "" },
+    { name: "RAF Donna Nook", zone: "" },
+    { name: "RAF Holbeach", zone: "" },
+    { name: "Chetwynd Barracks Chilwell", zone: "" },
+    { name: "Gamecock Barracks Bramcote", zone: "" },
+    { name: "MOD Stafford (Beacon Barracks)", zone: "" },
+    { name: "Whittington Barracks Lichfield (DMS)", zone: "" },
+    { name: "MOD Donnington", zone: "" },
+    { name: "RAF Cosford", zone: "" },
+    { name: "RAF Shawbury", zone: "" },
+    { name: "Clive Barracks Tern Hill", zone: "" },
+    { name: "Copthorne Barracks Shrewsbury", zone: "" },
+    { name: "Credenhill (Stirling Lines)", zone: "" },
+    { name: "MOD Kineton", zone: "" },
+    { name: "MOD St Athan", zone: "" },
+    { name: "Brecon Barracks", zone: "" },
+    { name: "Sennybridge Training Area", zone: "" },
+    { name: "Castlemartin Camp", zone: "" },
+    { name: "RAF Valley", zone: "" },
+    { name: "Dale Barracks Chester", zone: "" },
+    { name: "Weeton Barracks", zone: "" },
+    { name: "Fulwood Barracks Preston", zone: "" },
     { name: "RAF Woodvale", zone: "" },
-    { name: "RAF Wyton", zone: "" }
+    { name: "Catterick Garrison", zone: "" },
+    { name: "Marne Barracks Catterick", zone: "" },
+    { name: "Bourlon Barracks Catterick", zone: "" },
+    { name: "Gaza Barracks Catterick", zone: "" },
+    { name: "Megiddo Lines Catterick", zone: "" },
+    { name: "Somme Barracks Catterick", zone: "" },
+    { name: "Vimy Barracks Catterick", zone: "" },
+    { name: "Imphal Barracks York", zone: "" },
+    { name: "Queen Elizabeth Barracks Strensall", zone: "" },
+    { name: "Alanbrooke Barracks Topcliffe", zone: "" },
+    { name: "Claro Barracks Ripon", zone: "" },
+    { name: "Uniacke Barracks Harrogate", zone: "" },
+    { name: "Normandy Barracks Leconfield", zone: "" },
+    { name: "RAF Leeming", zone: "" },
+    { name: "RAF Fylingdales", zone: "" },
+    { name: "RAF Menwith Hill", zone: "" },
+    { name: "RAF Staxton Wold", zone: "" },
+    { name: "Albemarle Barracks Harlow Hill", zone: "" },
+    { name: "RAF Boulmer", zone: "" },
+    { name: "RAF Spadeadam", zone: "" }
   ];
+
+  function buildLogRows() {
+    const tbody = document.getElementById('log_body');
+    let html = '';
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      html += `<tr>
+        <td><input type="text" id="r${r}_c0" class="cell-in weekly" inputmode="numeric" placeholder="DD/MM" oninput="autoFormatDate(this)"></td>
+        <td><input type="text" id="r${r}_c1" class="cell-in left weekly site-input" autocomplete="off"></td>
+        <td><input type="text" id="r${r}_c2" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="r${r}_c3" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c4" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c5" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c6" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c7" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c8" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="r${r}_c9" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="r${r}_c10" class="cell-in weekly" inputmode="decimal" oninput="updateAllTotals()"></td>
+      </tr>`;
+    }
+    tbody.innerHTML = html;
+
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      const siteInp = document.getElementById(`r${r}_c1`);
+      siteInp.addEventListener('input', function() {
+        showSiteSuggestions(this, r);
+        checkSiteZoneAutoFill(r);
+      });
+      siteInp.addEventListener('focus', function() {
+        if (this.value.trim().length > 0) showSiteSuggestions(this, r);
+      });
+
+      for (let c = 3; c <= 7; c++) {
+        const tickInp = document.getElementById(`r${r}_c${c}`);
+        tickInp.addEventListener('click', function() {
+          this.value = (this.value === '✓') ? '' : '✓';
+          updateAllTotals();
+          saveState();
+        });
+      }
+    }
+  }
+
+  function showSiteSuggestions(inputEl, rIdx) {
+    const box = document.getElementById('custom_ac');
+    const q = inputEl.value.trim().toLowerCase();
+    if (!q) {
+      box.style.display = 'none';
+      return;
+    }
+    const matches = getSites().filter(s => s.name.toLowerCase().includes(q)).slice(0, 12);
+    if (matches.length === 0) {
+      box.style.display = 'none';
+      return;
+    }
+    const rect = inputEl.getBoundingClientRect();
+    box.style.left = (rect.left + window.scrollX) + 'px';
+    box.style.top = (rect.bottom + window.scrollY + 2) + 'px';
+    box.style.width = Math.max(rect.width, 220) + 'px';
+    box.innerHTML = '';
+
+    matches.forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'ac-item';
+      const zSpan = m.zone ? `<span class="ac-zone">Z${m.zone}</span>` : '';
+      item.innerHTML = `<span>${m.name}</span>${zSpan}`;
+      item.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        selectSiteSuggestion(rIdx, m.name, m.zone);
+      });
+      item.addEventListener('touchstart', function(e) {
+        e.preventDefault();
+        selectSiteSuggestion(rIdx, m.name, m.zone);
+      }, { passive: false });
+      box.appendChild(item);
+    });
+    box.style.display = 'block';
+  }
+
+  function selectSiteSuggestion(rIdx, name, zone) {
+    const siteEl = document.getElementById(`r${rIdx}_c1`);
+    const zoneEl = document.getElementById(`r${rIdx}_c2`);
+    if (siteEl) siteEl.value = name;
+    if (zoneEl && zone && zoneEl.value.trim() === '') zoneEl.value = zone;
+    document.getElementById('custom_ac').style.display = 'none';
+    updateAllTotals();
+    saveState();
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.classList.contains('site-input') && !e.target.closest('#custom_ac')) {
+      document.getElementById('custom_ac').style.display = 'none';
+    }
+  });
 
   function autoFormatDate(input) {
     let v = input.value.replace(/\D/g, '');
@@ -691,36 +977,6 @@ Here is the fully corrected code with the proper column alignments and spacing f
       input.value = v;
     }
     saveState();
-  }
-
-  function initGridBehaviours() {
-    const rows = document.querySelectorAll('#log_body tr');
-    rows.forEach((tr, rIdx) => {
-      const inputs = tr.querySelectorAll('input');
-      inputs.forEach((inp, cIdx) => {
-        inp.id = `r${rIdx}_c${cIdx}`;
-        if (cIdx === 0) {
-          inp.setAttribute('inputmode', 'numeric');
-          inp.setAttribute('placeholder', 'DD/MM');
-        } else if (cIdx === 1) {
-          inp.setAttribute('list', 'site_suggestions');
-          inp.addEventListener('input', () => checkSiteZoneAutoFill(rIdx));
-        } else if (cIdx === 2 || cIdx === 8 || cIdx === 9) {
-          inp.setAttribute('inputmode', 'numeric');
-        } else if (cIdx >= 3 && cIdx <= 7) {
-          inp.readOnly = true;
-          inp.classList.add('tick-cell');
-          inp.addEventListener('click', function() {
-            this.value = (this.value === '✓') ? '' : '✓';
-            updateAllTotals();
-            saveState();
-          });
-        } else if (cIdx === 10) {
-          inp.setAttribute('inputmode', 'decimal');
-          inp.addEventListener('input', updateAllTotals);
-        }
-      });
-    });
   }
 
   function autoFillWeekDates() {
@@ -795,7 +1051,7 @@ Here is the fully corrected code with the proper column alignments and spacing f
     let totalTasks = 0, totalOt = 0;
     cols.forEach(col => {
       let sum = 0, hasVal = false;
-      for (let r = 0; r < 16; r++) {
+      for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
         const el = document.getElementById(`r${r}_c${col.idx}`);
         if (!el) continue;
         const raw = el.value.trim();
@@ -823,7 +1079,7 @@ Here is the fully corrected code with the proper column alignments and spacing f
       if (!isNaN(p) && p > 0) { privMiles += p; }
     }
     let sitesLogged = 0;
-    for (let r = 0; r < 16; r++) {
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
       const sEl = document.getElementById(`r${r}_c1`);
       if (sEl && sEl.value.trim() !== '') sitesLogged++;
     }
@@ -834,7 +1090,6 @@ Here is the fully corrected code with the proper column alignments and spacing f
 
     const targetDays = Math.max(5, daysWithWork);
     const estWorkMiles = daysWithWork > 0 ? Math.round((workMiles / daysWithWork) * targetDays) : 0;
-    const estOt = daysWithWork > 0 ? Math.round(((totalOt / daysWithWork) * targetDays) * 10) / 10 : 0;
     
     const hourlyRate = parseFloat(document.getElementById('ot_rate').value) || 0;
     const multiplier = parseFloat(document.getElementById('ot_mult').value) || 1;
@@ -859,7 +1114,10 @@ Here is the fully corrected code with the proper column alignments and spacing f
       if (stored) {
         const userSites = JSON.parse(stored);
         userSites.forEach(us => {
-          if (!sites.some(s => s.name.toLowerCase() === us.name.toLowerCase())) {
+          const existing = sites.find(s => s.name.toLowerCase() === us.name.toLowerCase());
+          if (existing) {
+            if (us.zone) existing.zone = us.zone;
+          } else {
             sites.push(us);
           }
         });
@@ -871,19 +1129,14 @@ Here is the fully corrected code with the proper column alignments and spacing f
 
   function renderSites() {
     const sites = getSites();
-    const datalist = document.getElementById('site_suggestions');
     const tagList = document.getElementById('site_tags_list');
-    datalist.innerHTML = '';
     tagList.innerHTML = '';
     sites.forEach((s) => {
-      const opt = document.createElement('option');
-      opt.value = s.name;
-      datalist.appendChild(opt);
       const tag = document.createElement('span');
       tag.className = 'site-tag';
       const zoneText = s.zone ? ` (Zone ${s.zone})` : '';
       const isCustom = !window.PERMANENT_SITES.some(ps => ps.name.toLowerCase() === s.name.toLowerCase());
-      const deleteBtn = isCustom ? ` <button type="button" onclick="deleteSavedSite('${s.name}')">×</button>` : '';
+      const deleteBtn = isCustom ? ` <button type="button" onclick="deleteSavedSite('${s.name.replace(/'/g, "\\'")}')">×</button>` : '';
       tag.innerHTML = `${s.name}${zoneText}${deleteBtn}`;
       tagList.appendChild(tag);
     });
@@ -895,22 +1148,28 @@ Here is the fully corrected code with the proper column alignments and spacing f
     const name = nameEl.value.trim();
     const zone = zoneEl.value.trim();
     if (!name) return;
-    const sites = getSites().filter(s => s.name.toLowerCase() !== name.toLowerCase());
-    sites.push({ name, zone });
-    saveSitesToLocal(sites);
+    let stored = [];
+    try {
+      const raw = localStorage.getItem(SITES_KEY);
+      if (raw) stored = JSON.parse(raw);
+    } catch (e) {}
+    stored = stored.filter(s => s.name.toLowerCase() !== name.toLowerCase());
+    stored.push({ name, zone });
+    try { localStorage.setItem(SITES_KEY, JSON.stringify(stored)); } catch (e) {}
+    renderSites();
     nameEl.value = '';
     zoneEl.value = '';
   }
 
-  function saveSitesToLocal(sites) {
-    const customOnly = sites.filter(s => !window.PERMANENT_SITES.some(ps => ps.name.toLowerCase() === s.name.toLowerCase()));
-    try { localStorage.setItem(SITES_KEY, JSON.stringify(customOnly)); } catch (e) {}
-    renderSites();
-  }
-
   function deleteSavedSite(siteName) {
-    let sites = getSites().filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
-    saveSitesToLocal(sites);
+    let stored = [];
+    try {
+      const raw = localStorage.getItem(SITES_KEY);
+      if (raw) stored = JSON.parse(raw);
+    } catch (e) {}
+    stored = stored.filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
+    try { localStorage.setItem(SITES_KEY, JSON.stringify(stored)); } catch (e) {}
+    renderSites();
   }
 
   function checkSiteZoneAutoFill(rIdx) {
@@ -969,7 +1228,7 @@ Here is the fully corrected code with the proper column alignments and spacing f
 
   document.addEventListener('input', () => { updateAllTotals(); saveState(); });
   window.addEventListener('DOMContentLoaded', () => {
-    initGridBehaviours();
+    buildLogRows();
     renderSites();
     loadState();
     updateAllTotals();
@@ -985,4 +1244,5 @@ Here is the fully corrected code with the proper column alignments and spacing f
 </script>
 </body>
 </html>
+
 
