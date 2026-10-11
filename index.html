@@ -1,3 +1,6 @@
+That text is appearing because when you tap the "Copy" button on the whole message in the Gemini app, it copies my conversational intro text and the code together. When you paste that into GitHub, my chat sentence ends up sitting at Line 1 of your index.html file.
+Even better: I have added a JavaScript "auto-cleaner" inside the code below that will automatically detect and delete any accidental text sitting above your dashboard the second the page loads, so it can never show up on your screen or printouts again.
+I have put zero text in this message below this line—tap the Copy icon inside the top-right corner of the dark code box (not the copy button at the very bottom of the message), delete everything in index.html, and paste:
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -17,7 +20,6 @@
     overflow-x: auto;
   }
 
-  /* 1. PIN LOCK SCREEN */
   #pin_screen {
     position: fixed;
     inset: 0;
@@ -68,7 +70,6 @@
   }
   #pin_err { color: #f87171; font-size: 12px; margin-top: 10px; min-height: 16px; }
 
-  /* 2. WORK HUB MENU */
   #hub_view {
     display: none;
     max-width: 500px;
@@ -120,7 +121,6 @@
   }
   .text-btn:hover { color: #38bdf8; }
 
-  /* 3. TIMESHEET VIEW */
   #timesheet_view {
     display: none;
     background: #e5e7eb;
@@ -238,7 +238,6 @@
   }
   .site-tag button { background: none; border: none; color: #f87171; font-weight: bold; cursor: pointer; padding: 0; font-size: 12px; }
 
-  /* Custom Predictive Dropdown */
   #custom_ac {
     position: absolute;
     background: #1e293b;
@@ -263,7 +262,6 @@
   .ac-item:hover, .ac-item:active { background: #3b82f6; color: #fff; }
   .ac-zone { color: #38bdf8; font-size: 10px; font-weight: bold; }
 
-  /* A4 Sheet */
   .sheet {
     width: 760px;
     margin: 0 auto;
@@ -330,7 +328,6 @@
   }
   .day-toggle:checked + .day-label { border-color: #000; }
 
-  /* CLEAN SINGLE-PAGE A4 PRINT */
   @media print {
     @page { size: A4 portrait; margin: 0mm; }
     body { background: #fff !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
@@ -564,6 +561,15 @@
   const STORAGE_KEY = 'nurture_ts_master_v3';
   const TOTAL_LOG_ROWS = 34;
 
+  // Automatically strip any accidental text nodes pasted outside the app containers
+  function cleanStrayTextNodes() {
+    Array.from(document.body.childNodes).forEach(node => {
+      if (node.nodeType === 3 && node.textContent.trim() !== '') {
+        node.remove();
+      }
+    });
+  }
+
   function verifyPin() {
     const val = document.getElementById('pin_box').value;
     if (val === HUB_PIN) {
@@ -615,9 +621,7 @@
     }
   }
 
-  // Master Database of South East, London, Ceremonial, RAF, RN & UK MOD Sites
   window.PERMANENT_SITES = [
-    // Royal, Ceremonial & Central London Sites
     { name: "Buckingham Palace", zone: "" },
     { name: "St James's Palace", zone: "" },
     { name: "Clarence House", zone: "" },
@@ -645,8 +649,6 @@
     { name: "Latchmere House", zone: "" },
     { name: "Kneller Hall Twickenham", zone: "" },
     { name: "Northwood Headquarters", zone: "" },
-
-    // Berkshire, Surrey & Hampshire MOD Estates
     { name: "RMAS Sandhurst", zone: "" },
     { name: "Watchfield / Defence Academy Shrivenham", zone: "" },
     { name: "Denison Barracks Hermitage", zone: "" },
@@ -702,8 +704,6 @@
     { name: "Tipner Ranges", zone: "" },
     { name: "Browndown Camp", zone: "" },
     { name: "Thorney Island (Baker Barracks)", zone: "" },
-
-    // Buckinghamshire, Oxfordshire & Bedfordshire MOD Sites
     { name: "RAF Medmenham", zone: "" },
     { name: "Danesfield House Medmenham", zone: "" },
     { name: "RAF High Wycombe (Air Command)", zone: "" },
@@ -724,8 +724,6 @@
     { name: "RAF Barford St John", zone: "" },
     { name: "Chicksands (DIFC)", zone: "" },
     { name: "RAF Henlow", zone: "" },
-
-    // Kent, Sussex & Essex MOD Sites
     { name: "Brompton Barracks Chatham", zone: "" },
     { name: "Chattenden Barracks", zone: "" },
     { name: "Lodge Hill Camp", zone: "" },
@@ -746,12 +744,10 @@
     { name: "Colchester Garrison", zone: "" },
     { name: "Merville Barracks Colchester", zone: "" },
     { name: "Goojera Barracks Colchester", zone: "" },
-    { name: "foynes Barracks Colchester", zone: "" },
+    { name: "Foynes Barracks Colchester", zone: "" },
     { name: "Carver Barracks Wimbish", zone: "" },
     { name: "MOD Shoeburyness (Foulness Island)", zone: "" },
     { name: "Fingringhoe Ranges", zone: "" },
-
-    // Wiltshire, Dorset & South West MOD Sites
     { name: "Tidworth Camp / Garrison", zone: "" },
     { name: "Aliwal Barracks Tidworth", zone: "" },
     { name: "Assaye Barracks Tidworth", zone: "" },
@@ -799,8 +795,6 @@
     { name: "RAF Fairford", zone: "" },
     { name: "Duke of Gloucester Barracks South Cerney", zone: "" },
     { name: "Beachley Barracks Chepstow", zone: "" },
-
-    // East Anglia, Midlands, North & Remaining RAF/Army Stations
     { name: "RAF Northolt", zone: "" },
     { name: "RAF Wyton", zone: "" },
     { name: "RAF Alconbury", zone: "" },
@@ -1228,6 +1222,7 @@
 
   document.addEventListener('input', () => { updateAllTotals(); saveState(); });
   window.addEventListener('DOMContentLoaded', () => {
+    cleanStrayTextNodes();
     buildLogRows();
     renderSites();
     loadState();
@@ -1244,5 +1239,4 @@
 </script>
 </body>
 </html>
-
 
