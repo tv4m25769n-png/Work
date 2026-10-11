@@ -1,7 +1,6 @@
-Looking at your screenshot, I can see exactly why it is stuck at 0h.
-When the table rows are built dynamically via JavaScript on page load, their input elements are given IDs like r0_c8 and r0_c9. However, because the state restoration (loadState()) or initial DOM rendering sequence ran before buildLogRows() fully bound the input names, the loop reading document.getElementById('r' + r + '_c8') was looking at elements that didn't have their values bound to the proper runtime selectors when updateAllTotals() executed.
-I have refactored the total hours loop so that instead of querying brittle element ID strings row-by-row, it directly targets all active row elements inside the table body (#log_body tr), reading columns index 8 and 9 reliably every single time you type.
-Here is the fully corrected code:
+Here is the full code. Paste it over your current page.
+
+```html
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -154,10 +153,11 @@ Here is the fully corrected code:
               <option value="2">2.0x</option>
             </select>
           </div>
+          <div id="ot_earnings" style="margin-top:2px;"></div>
         </div>
       </div>
       <div class="counter-card"><div class="counter-label">Tasks</div><div class="counter-val" id="cnt_tasks">0</div><div class="counter-sub" id="pred_tasks">0 sites logged</div></div>
-      <div class="counter-card"><div class="counter-label">Total Hours</div><div class="counter-val" id="cnt_total_hrs">0h</div><div class="counter-sub" id="pred_contract">Contract: 40h</div></div>
+      <div class="counter-card"><div class="counter-label">Total Hours</div><div class="counter-val" id="cnt_total_hrs">0h 00m</div><div class="counter-sub" id="pred_contract">0h 00m of 40h + 0h OT</div></div>
     </div>
     <div id="site_drawer">
       <div class="site-add-row">
@@ -283,8 +283,13 @@ Here is the fully corrected code:
   const STORAGE_KEY = 'nurture_ts_master_v3';
   const TOTAL_LOG_ROWS = 34;
 
-  const TRAVEL_BUFFER_START = 8 * 60;       // 08:00
-  const TRAVEL_BUFFER_END = 17 * 60 + 30;   // 17:30
+  // Contract rules (clause 7)
+  const TRAVEL_BUFFER_START = 8 * 60;       // 08:00 (08:30 contracted start less 30 min unpaid commute)
+  const TRAVEL_BUFFER_END = 17 * 60 + 30;   // 17:30 (17:00 contracted finish plus 30 min unpaid commute)
+  const COMMUTE_MINS = 30;                  // unpaid commute at each end of every shift
+  const BREAK_THRESHOLD_MINS = 360;         // unpaid break applies if working more than 6 hours
+  const BREAK_MINS = 30;
+  const CONTRACT_HRS = 40;
 
   const DEFAULT_SITE_NAMES = [
     "Buckingham Palace","St James's Palace","Clarence House","Kensington Palace","Windsor Castle","Frogmore House","Hampton Court Palace","Tower of London","Horse Guards","MOD Main Building Whitehall","Old War Office Whitehall","Wellington Barracks","Hyde Park Barracks","Regent's Park Barracks","Chelsea Barracks","Royal Hospital Chelsea","Victoria Barracks Windsor","Combermere Barracks Windsor","Royal Artillery Barracks Woolwich","Woolwich Garrison","Napier Lines Woolwich","Cavalry Barracks Hounslow","Armoury House (HAC)","King's Troop RHA Woolwich","Latchmere House","Kneller Hall Twickenham","Northwood Headquarters",
@@ -482,18 +487,42 @@ Here is the fully corrected code:
     return false;
   }
 
-  function calcRowOvertime(rIdx) {
-    const sMins = parseTimeMins(document.getElementById(`r${rIdx}_c8`)?.value || '');
-    const fMins = parseTimeMins(document.getElementById(`r${rIdx}_c9`)?.value || '');
-    const otEl = document.getElementById(`r${rIdx}_c10`);
-    if (!otEl || sMins === null || fMins === null) { updateAllTotals(); return; }
+  // Paid minutes for one shift: span less unpaid commute (both ends) less unpaid break if over 6h worked
+  function paidMinsForShift(sMins, fMins) {
+    const endMins = fMins < sMins ? fMins + 1440 : fMins;
+    let paid = endMins - sMins - COMMUTE_MINS * 2;
+    if (paid > BREAK_THRESHOLD_MINS) paid -= BREAK_MINS;
+    return Math.max(0, paid);
+  }
 
-    let endMins = fMins < sMins ? fMins + 1440 : fMins;
+  function fmtHrs(h) {
+    const m = Math.round(h * 60);
+    return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`;
+  }
+
+  // quiet = true skips the totals/save step (used when recalculating every row in a loop)
+  function calcRowOvertime(rIdx, quiet) {
+    const sRaw = document.getElementById(`r${rIdx}_c8`)?.value || '';
+    const fRaw = document.getElementById(`r${rIdx}_c9`)?.value || '';
+    const sMins = parseTimeMins(sRaw);
+    const fMins = parseTimeMins(fRaw);
+    const otEl = document.getElementById(`r${rIdx}_c10`);
+    if (!otEl) return;
+
+    if (sMins === null || fMins === null) {
+      // A time was entered but isn't complete/valid: clear the stale overtime.
+      // If both times are empty, leave any manually typed overtime alone.
+      if (sRaw || fRaw) otEl.value = '';
+      if (!quiet) { updateAllTotals(); saveState(); }
+      return;
+    }
+
+    const endMins = fMins < sMins ? fMins + 1440 : fMins;
     let otMins = 0;
 
     if (isWeekendRow(rIdx)) {
-      let dur = endMins - sMins;
-      if (dur > 360) dur -= 30; // 30m unpaid break over 6h
+      let dur = endMins - sMins - COMMUTE_MINS * 2;
+      if (dur > BREAK_THRESHOLD_MINS) dur -= BREAK_MINS;
       otMins = Math.max(0, dur);
     } else {
       if (sMins < TRAVEL_BUFFER_START) {
@@ -506,16 +535,17 @@ Here is the fully corrected code:
 
     const otHours = Math.round((otMins / 60) * 100) / 100;
     otEl.value = otHours > 0 ? otHours : '';
-    updateAllTotals();
-    saveState();
+    if (!quiet) { updateAllTotals(); saveState(); }
   }
 
   function recalcAllOvertime() {
     for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
       if (parseTimeMins(document.getElementById(`r${r}_c8`)?.value) !== null && parseTimeMins(document.getElementById(`r${r}_c9`)?.value) !== null) {
-        calcRowOvertime(r);
+        calcRowOvertime(r, true);
       }
     }
+    updateAllTotals();
+    saveState();
   }
 
   function showSiteSuggestions(inputEl, rIdx) {
@@ -532,7 +562,15 @@ Here is the fully corrected code:
     matches.forEach(m => {
       const item = document.createElement('div');
       item.className = 'ac-item';
-      item.innerHTML = `<span>${m.name}</span>${m.zone ? `<span class="ac-zone">Z${m.zone}</span>` : ''}`;
+      const nameSpan = document.createElement('span');
+      nameSpan.textContent = m.name;
+      item.appendChild(nameSpan);
+      if (m.zone) {
+        const zoneSpan = document.createElement('span');
+        zoneSpan.className = 'ac-zone';
+        zoneSpan.textContent = 'Z' + m.zone;
+        item.appendChild(zoneSpan);
+      }
       item.addEventListener('mousedown', e => { e.preventDefault(); selectSiteSuggestion(rIdx, m.name, m.zone); });
       item.addEventListener('touchstart', e => { e.preventDefault(); selectSiteSuggestion(rIdx, m.name, m.zone); }, { passive: false });
       box.appendChild(item);
@@ -584,7 +622,6 @@ Here is the fully corrected code:
       document.getElementById(`m_date_${i}`).value = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
     }
     recalcAllOvertime();
-    saveState();
   }
 
   function recalcMileage(dayIdx, sourceField) {
@@ -620,6 +657,9 @@ Here is the fully corrected code:
   }
 
   function updateAllTotals() {
+    const setText = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+
+    // Column totals (R, EFK, F/U, C/O, T, Overtime)
     const cols = [{ idx: 3, id: 'tot_r' }, { idx: 4, id: 'tot_efk' }, { idx: 5, id: 'tot_fu' }, { idx: 6, id: 'tot_co' }, { idx: 7, id: 'tot_t' }, { idx: 10, id: 'tot_ot' }];
     let totalTasks = 0, totalOt = 0;
     cols.forEach(col => {
@@ -632,30 +672,28 @@ Here is the fully corrected code:
         }
       }
       const rounded = Math.round(sum * 100) / 100;
-      document.getElementById(col.id).value = hasVal ? rounded : '';
+      const out = document.getElementById(col.id);
+      if (out) out.value = hasVal ? rounded : '';
       if (col.idx === 10) totalOt = rounded;
       else totalTasks += rounded;
     });
 
+    // Total paid working time (commute and unpaid break taken off)
     let totalWorkingMins = 0;
     for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
-      const sVal = document.getElementById(`r${r}_c8`)?.value || '';
-      const fVal = document.getElementById(`r${r}_c9`)?.value || '';
-      const sMins = parseTimeMins(sVal);
-      const fMins = parseTimeMins(fVal);
-      if (sMins !== null && fMins !== null) {
-        let endMins = fMins < sMins ? fMins + 1440 : fMins;
-        let span = endMins - sMins;
-        totalWorkingMins += Math.max(0, span);
-      }
+      const sMins = parseTimeMins(document.getElementById(`r${r}_c8`)?.value || '');
+      const fMins = parseTimeMins(document.getElementById(`r${r}_c9`)?.value || '');
+      if (sMins === null || fMins === null) continue;
+      totalWorkingMins += paidMinsForShift(sMins, fMins);
     }
+    const totalHoursVal = totalWorkingMins / 60;
+    const normalHrs = Math.max(0, totalHoursVal - totalOt);
 
-    const totalHoursVal = Math.round((totalWorkingMins / 60) * 100) / 100;
-
+    // Mileage / days
     let daysWithWork = 0, workMiles = 0, privMiles = 0;
     for (let i = 0; i < 7; i++) {
-      const w = parseFloat(document.getElementById(`m_work_${i}`).value);
-      const p = parseFloat(document.getElementById(`m_priv_${i}`).value);
+      const w = parseFloat(document.getElementById(`m_work_${i}`)?.value);
+      const p = parseFloat(document.getElementById(`m_priv_${i}`)?.value);
       if (!isNaN(w) && w > 0) { workMiles += w; daysWithWork++; }
       if (!isNaN(p) && p > 0) privMiles += p;
     }
@@ -664,38 +702,39 @@ Here is the fully corrected code:
       if (document.getElementById(`r${r}_c1`)?.value.trim()) sitesLogged++;
     }
     let onCallCount = 0;
-    ['d_fri', 'd_sat', 'd_sun', 'd_mon'].forEach(id => { if (document.getElementById(id).checked) onCallCount++; });
+    ['d_fri', 'd_sat', 'd_sun', 'd_mon'].forEach(id => { if (document.getElementById(id)?.checked) onCallCount++; });
 
     const targetDays = Math.max(5, daysWithWork);
     const estWorkMiles = daysWithWork > 0 ? Math.round((workMiles / daysWithWork) * targetDays) : 0;
-    const hourlyRate = parseFloat(document.getElementById('ot_rate').value) || 0;
-    const multiplier = parseFloat(document.getElementById('ot_mult').value) || 1;
+    const hourlyRate = parseFloat(document.getElementById('ot_rate')?.value) || 0;
+    const multiplier = parseFloat(document.getElementById('ot_mult')?.value) || 1;
     const estOtEarnings = Math.round(totalOt * hourlyRate * multiplier * 100) / 100;
 
-    document.getElementById('cnt_work').textContent = Math.round(workMiles * 10) / 10;
-    document.getElementById('pred_work').textContent = `5-day est: ${estWorkMiles} mi`;
-    document.getElementById('cnt_priv').textContent = Math.round(privMiles * 10) / 10;
-    document.getElementById('pred_days').textContent = `${daysWithWork} day${daysWithWork === 1 ? '' : 's'} logged`;
-    document.getElementById('cnt_ot').textContent = totalOt;
-    document.getElementById('ot_earnings').textContent = `£${estOtEarnings.toFixed(2)} est (${multiplier}x)`;
-    document.getElementById('cnt_tasks').textContent = totalTasks;
-    document.getElementById('cnt_total_hrs').textContent = `${totalHoursVal}h`;
-    document.getElementById('pred_contract').textContent = `Contract: 40h`;
-    document.getElementById('cnt_oncall').textContent = onCallCount;
+    setText('cnt_work', Math.round(workMiles * 10) / 10);
+    setText('pred_work', `5-day est: ${estWorkMiles} mi`);
+    setText('cnt_priv', Math.round(privMiles * 10) / 10);
+    setText('pred_days', `${daysWithWork} day${daysWithWork === 1 ? '' : 's'} logged`);
+    setText('cnt_ot', totalOt);
+    setText('ot_earnings', `£${estOtEarnings.toFixed(2)} est (${multiplier}x)`);
+    setText('cnt_tasks', totalTasks);
+    setText('pred_tasks', `${sitesLogged} site${sitesLogged === 1 ? '' : 's'} logged`);
+    setText('cnt_total_hrs', fmtHrs(totalHoursVal));
+    setText('pred_contract', `${fmtHrs(normalHrs)} of ${CONTRACT_HRS}h + ${totalOt}h OT`);
+    setText('cnt_oncall', onCallCount);   // safe: ignored if the element doesn't exist
+  }
+
+  function readCustomSites() {
+    try { return JSON.parse(localStorage.getItem(SITES_KEY) || '[]') || []; }
+    catch (e) { return []; }
   }
 
   function getSites() {
     let sites = window.PERMANENT_SITES.map(s => ({ ...s }));
-    try {
-      const stored = localStorage.getItem(SITES_KEY);
-      if (stored) {
-        JSON.parse(stored).forEach(us => {
-          const existing = sites.find(s => s.name.toLowerCase() === us.name.toLowerCase());
-          if (existing) { if (us.zone) existing.zone = us.zone; }
-          else sites.push(us);
-        });
-      }
-    } catch (e) {}
+    readCustomSites().forEach(us => {
+      const existing = sites.find(s => s.name.toLowerCase() === us.name.toLowerCase());
+      if (existing) { if (us.zone) existing.zone = us.zone; }
+      else sites.push(us);
+    });
     return sites.sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -705,8 +744,16 @@ Here is the fully corrected code:
     getSites().forEach(s => {
       const tag = document.createElement('span');
       tag.className = 'site-tag';
+      tag.appendChild(document.createTextNode(s.name + (s.zone ? ` (Zone ${s.zone})` : '')));
       const isCustom = !window.PERMANENT_SITES.some(ps => ps.name.toLowerCase() === s.name.toLowerCase());
-      tag.innerHTML = `${s.name}${s.zone ? ` (Zone ${s.zone})` : ''}${isCustom ? ` <button type="button" onclick="deleteSavedSite('${s.name.replace(/'/g, "\\'")}')">×</button>` : ''}`;
+      if (isCustom) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '×';
+        btn.addEventListener('click', () => deleteSavedSite(s.name));
+        tag.appendChild(document.createTextNode(' '));
+        tag.appendChild(btn);
+      }
       tagList.appendChild(tag);
     });
   }
@@ -715,7 +762,7 @@ Here is the fully corrected code:
     const nameEl = document.getElementById('new_site_name'), zoneEl = document.getElementById('new_site_zone');
     const name = nameEl.value.trim(), zone = zoneEl.value.trim();
     if (!name) return;
-    let stored = JSON.parse(localStorage.getItem(SITES_KEY) || '[]').filter(s => s.name.toLowerCase() !== name.toLowerCase());
+    const stored = readCustomSites().filter(s => s.name.toLowerCase() !== name.toLowerCase());
     stored.push({ name, zone });
     localStorage.setItem(SITES_KEY, JSON.stringify(stored));
     renderSites();
@@ -723,7 +770,7 @@ Here is the fully corrected code:
   }
 
   function deleteSavedSite(siteName) {
-    let stored = JSON.parse(localStorage.getItem(SITES_KEY) || '[]').filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
+    const stored = readCustomSites().filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
     localStorage.setItem(SITES_KEY, JSON.stringify(stored));
     renderSites();
   }
@@ -797,4 +844,4 @@ Here is the fully corrected code:
 </script>
 </body>
 </html>
-
+```
