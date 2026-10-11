@@ -1,6 +1,4 @@
-That text is appearing because when you tap the "Copy" button on the whole message in the Gemini app, it copies my conversational intro text and the code together. When you paste that into GitHub, my chat sentence ends up sitting at Line 1 of your index.html file.
-Even better: I have added a JavaScript "auto-cleaner" inside the code below that will automatically detect and delete any accidental text sitting above your dashboard the second the page loads, so it can never show up on your screen or printouts again.
-I have put zero text in this message below this line—tap the Copy icon inside the top-right corner of the dark code box (not the copy button at the very bottom of the message), delete everything in index.html, and paste:
+
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -561,7 +559,6 @@ I have put zero text in this message below this line—tap the Copy icon inside 
   const STORAGE_KEY = 'nurture_ts_master_v3';
   const TOTAL_LOG_ROWS = 34;
 
-  // Automatically strip any accidental text nodes pasted outside the app containers
   function cleanStrayTextNodes() {
     Array.from(document.body.childNodes).forEach(node => {
       if (node.nodeType === 3 && node.textContent.trim() !== '') {
@@ -880,8 +877,8 @@ I have put zero text in this message below this line—tap the Copy icon inside 
         <td><input type="text" id="r${r}_c5" class="cell-in weekly tick-cell" readonly></td>
         <td><input type="text" id="r${r}_c6" class="cell-in weekly tick-cell" readonly></td>
         <td><input type="text" id="r${r}_c7" class="cell-in weekly tick-cell" readonly></td>
-        <td><input type="text" id="r${r}_c8" class="cell-in weekly" inputmode="numeric"></td>
-        <td><input type="text" id="r${r}_c9" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="r${r}_c8" class="cell-in weekly" inputmode="numeric" placeholder="HH:MM" oninput="autoFormatTime(this)"></td>
+        <td><input type="text" id="r${r}_c9" class="cell-in weekly" inputmode="numeric" placeholder="HH:MM" oninput="autoFormatTime(this)"></td>
         <td><input type="text" id="r${r}_c10" class="cell-in weekly" inputmode="decimal" oninput="updateAllTotals()"></td>
       </tr>`;
     }
@@ -967,6 +964,17 @@ I have put zero text in this message below this line—tap the Copy icon inside 
       input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
     } else if (v.length >= 3) {
       input.value = `${v.slice(0,2)}/${v.slice(2)}`;
+    } else {
+      input.value = v;
+    }
+    saveState();
+  }
+
+  function autoFormatTime(input) {
+    let v = input.value.replace(/\D/g, '');
+    if (v.length > 4) v = v.slice(0, 4);
+    if (v.length >= 3) {
+      input.value = `${v.slice(0,2)}:${v.slice(2)}`;
     } else {
       input.value = v;
     }
