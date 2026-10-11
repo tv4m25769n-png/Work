@@ -1,6 +1,3 @@
-Here is the full code. Paste it over your current page.
-
-```html
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -157,7 +154,7 @@ Here is the full code. Paste it over your current page.
         </div>
       </div>
       <div class="counter-card"><div class="counter-label">Tasks</div><div class="counter-val" id="cnt_tasks">0</div><div class="counter-sub" id="pred_tasks">0 sites logged</div></div>
-      <div class="counter-card"><div class="counter-label">Total Hours</div><div class="counter-val" id="cnt_total_hrs">0h 00m</div><div class="counter-sub" id="pred_contract">0h 00m of 40h + 0h OT</div></div>
+      <div class="counter-card"><div class="counter-label">Total Hours</div><div class="counter-val" id="cnt_total_hrs">0h 00m</div><div class="counter-sub" id="pred_contract">0 days · −0m break</div></div>
     </div>
     <div id="site_drawer">
       <div class="site-add-row">
@@ -286,8 +283,8 @@ Here is the full code. Paste it over your current page.
   // Contract rules (clause 7)
   const TRAVEL_BUFFER_START = 8 * 60;       // 08:00 (08:30 contracted start less 30 min unpaid commute)
   const TRAVEL_BUFFER_END = 17 * 60 + 30;   // 17:30 (17:00 contracted finish plus 30 min unpaid commute)
-  const COMMUTE_MINS = 30;                  // unpaid commute at each end of every shift
-  const BREAK_THRESHOLD_MINS = 360;         // unpaid break applies if working more than 6 hours
+  const COMMUTE_MINS = 30;
+  const BREAK_THRESHOLD_MINS = 360;         // unpaid break applies on a day with more than 6 hours (set to 0 to take it off every day)
   const BREAK_MINS = 30;
   const CONTRACT_HRS = 40;
 
@@ -487,12 +484,10 @@ Here is the full code. Paste it over your current page.
     return false;
   }
 
-  // Paid minutes for one shift: span less unpaid commute (both ends) less unpaid break if over 6h worked
-  function paidMinsForShift(sMins, fMins) {
+  // Minutes between a row's start and finish time (finish after midnight handled)
+  function rowMins(sMins, fMins) {
     const endMins = fMins < sMins ? fMins + 1440 : fMins;
-    let paid = endMins - sMins - COMMUTE_MINS * 2;
-    if (paid > BREAK_THRESHOLD_MINS) paid -= BREAK_MINS;
-    return Math.max(0, paid);
+    return Math.max(0, endMins - sMins);
   }
 
   function fmtHrs(h) {
@@ -521,7 +516,7 @@ Here is the full code. Paste it over your current page.
     let otMins = 0;
 
     if (isWeekendRow(rIdx)) {
-      let dur = endMins - sMins - COMMUTE_MINS * 2;
+      let dur = endMins - sMins;
       if (dur > BREAK_THRESHOLD_MINS) dur -= BREAK_MINS;
       otMins = Math.max(0, dur);
     } else {
@@ -678,16 +673,26 @@ Here is the full code. Paste it over your current page.
       else totalTasks += rounded;
     });
 
-    // Total paid working time (commute and unpaid break taken off)
-    let totalWorkingMins = 0;
+    // Total of all time entered, grouped by day, less a 30 min break on any day over 6h
+    const dayMins = {};
+    let currentDay = '__nodate__', timedRows = 0;
     for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      const dateVal = (document.getElementById(`r${r}_c0`)?.value || '').trim();
+      if (dateVal) currentDay = dateVal.slice(0, 5);
       const sMins = parseTimeMins(document.getElementById(`r${r}_c8`)?.value || '');
       const fMins = parseTimeMins(document.getElementById(`r${r}_c9`)?.value || '');
       if (sMins === null || fMins === null) continue;
-      totalWorkingMins += paidMinsForShift(sMins, fMins);
+      dayMins[currentDay] = (dayMins[currentDay] || 0) + rowMins(sMins, fMins);
+      timedRows++;
     }
+    let totalWorkingMins = 0, breakMins = 0;
+    Object.values(dayMins).forEach(m => {
+      const brk = m > BREAK_THRESHOLD_MINS ? BREAK_MINS : 0;
+      breakMins += brk;
+      totalWorkingMins += m - brk;
+    });
+    const timedDays = Object.keys(dayMins).length;
     const totalHoursVal = totalWorkingMins / 60;
-    const normalHrs = Math.max(0, totalHoursVal - totalOt);
 
     // Mileage / days
     let daysWithWork = 0, workMiles = 0, privMiles = 0;
@@ -719,7 +724,7 @@ Here is the full code. Paste it over your current page.
     setText('cnt_tasks', totalTasks);
     setText('pred_tasks', `${sitesLogged} site${sitesLogged === 1 ? '' : 's'} logged`);
     setText('cnt_total_hrs', fmtHrs(totalHoursVal));
-    setText('pred_contract', `${fmtHrs(normalHrs)} of ${CONTRACT_HRS}h + ${totalOt}h OT`);
+    setText('pred_contract', `${timedDays} day${timedDays === 1 ? '' : 's'} · −${breakMins}m break`);
     setText('cnt_oncall', onCallCount);   // safe: ignored if the element doesn't exist
   }
 
@@ -844,4 +849,3 @@ Here is the full code. Paste it over your current page.
 </script>
 </body>
 </html>
-```
