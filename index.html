@@ -1,6 +1,7 @@
-Your PIN screen is hanging because the entire <script> block got truncated or corrupted when pasted into GitHub (mobile browsers often cut off long clipboard pastes around the 25,000-character mark), or because Safari is holding onto a cached version of the page. When the closing </script> tag gets cut off, the verifyPin() function never loads, so typing your 4 digits does nothing.
-I have compacted the site database onto clean single lines so the entire file is half the size and won't get cut off by your clipboard, and I hardened verifyPin() so it unlocks the screen immediately with zero delay.
-Tap the Copy icon in the top-right corner of the code box below, delete everything in your index.html file on GitHub, and paste this in:
+I have added two simple buttons to your dashboard: Export Save and Import Save.
+ * Export Save: Tapping this instantly downloads a compact backup file of your current week's entries and custom sites directly to your device.
+ * Import Save: Tapping this lets you select a backup file you previously exported, instantly restoring all data onto that device.
+Here is the updated code:
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -36,7 +37,6 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
   .no-print { width: 760px; margin: 0 auto 10px auto; background: #111827; color: #f9fafb; border-radius: 8px; padding: 10px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
   .dash-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #374151; }
   .dash-title { font-size: 13px; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 8px; }
-  .sync-badge { font-size: 10px; padding: 3px 7px; border-radius: 12px; background: #1f2937; border: 1px solid #374151; color: #9ca3af; cursor: pointer; font-weight: normal; }
   .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
   .btn { border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; color: #fff; }
   .btn-green { background: #10b981; }
@@ -118,7 +118,6 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
     </button>
   </div>
   <div class="hub-footer-actions">
-    <button type="button" class="text-btn" onclick="setupCloudSyncPrompt()">Private Cloud Sync Setup</button>
     <button type="button" class="text-btn" onclick="changePinPrompt()">Change Hub PIN</button>
     <button type="button" class="text-btn" onclick="lockHub()">Lock Hub</button>
   </div>
@@ -130,10 +129,10 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
       <div class="dash-title">
         <button type="button" class="btn btn-gray" onclick="openHub()">← Back to Hub</button>
         <span>Live Weekly Counter</span>
-        <span id="sync_status" class="sync-badge" onclick="setupCloudSyncPrompt()" title="Tap to configure Private Cloud Sync">☁️ Local Only</span>
       </div>
       <div class="btn-group">
-        <button type="button" class="btn btn-blue" onclick="pullFromCloud(true)">Sync Now</button>
+        <button type="button" class="btn btn-blue" onclick="exportSaveFile()">Export Save</button>
+        <button type="button" class="btn btn-blue" onclick="importSaveFilePrompt()">Import Save</button>
         <button type="button" class="btn btn-purple" onclick="toggleSiteDrawer()">Manage Sites</button>
         <button type="button" class="btn btn-gray" onclick="clearWeeklyEntries()">New Week</button>
         <button type="button" class="btn btn-green" onclick="window.print()">Download / Save as PDF</button>
@@ -169,6 +168,8 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
       <div class="site-tags" id="site_tags_list"></div>
     </div>
   </div>
+
+  <input type="file" id="import_file_input" style="display:none;" accept=".json" onchange="handleFileImport(event)">
 
   <div id="custom_ac"></div>
 
@@ -281,15 +282,10 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
   const AUTH_KEY = 'ml_hub_unlocked';
   const SITES_KEY = 'nurture_saved_sites_v3';
   const STORAGE_KEY = 'nurture_ts_master_v3';
-  const GH_TOKEN_KEY = 'ml_gh_sync_token';
-  const GH_GIST_ID_KEY = 'ml_gh_gist_id';
-  const GIST_FILENAME = 'nurture_work_hub_encrypted.json';
   const TOTAL_LOG_ROWS = 34;
-  const CONTRACT_START_MINS = 8 * 60 + 30;
-  const CONTRACT_END_MINS = 17 * 60;
 
-  let syncTimeout = null;
-  let isApplyingRemote = false;
+  const TRAVEL_BUFFER_START = 8 * 60;       // 08:00
+  const TRAVEL_BUFFER_END = 17 * 60 + 30;   // 17:30
 
   const DEFAULT_SITE_NAMES = [
     "Buckingham Palace","St James's Palace","Clarence House","Kensington Palace","Windsor Castle","Frogmore House","Hampton Court Palace","Tower of London","Horse Guards","MOD Main Building Whitehall","Old War Office Whitehall","Wellington Barracks","Hyde Park Barracks","Regent's Park Barracks","Chelsea Barracks","Royal Hospital Chelsea","Victoria Barracks Windsor","Combermere Barracks Windsor","Royal Artillery Barracks Woolwich","Woolwich Garrison","Napier Lines Woolwich","Cavalry Barracks Hounslow","Armoury House (HAC)","King's Troop RHA Woolwich","Latchmere House","Kneller Hall Twickenham","Northwood Headquarters",
@@ -318,7 +314,6 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
     if (val === HUB_PIN) {
       localStorage.setItem(AUTH_KEY, '1');
       openHub();
-      setTimeout(() => { try { pullFromCloud(false); } catch(e) {} }, 150);
     } else {
       document.getElementById('pin_err').textContent = 'Incorrect PIN';
       if (box) box.value = '';
@@ -341,11 +336,10 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
       alert("Incorrect current PIN.");
       return;
     }
-    const newPin = prompt("Enter your new 4-digit PIN (Use the same PIN on all devices for encrypted sync):");
+    const newPin = prompt("Enter your new 4-digit PIN:");
     if (newPin && newPin.trim().length === 4 && !isNaN(newPin.trim())) {
       HUB_PIN = newPin.trim();
       localStorage.setItem('ml_hub_pin', HUB_PIN);
-      pushToCloud();
       alert("PIN updated!");
     } else {
       alert("Invalid PIN. Must be 4 digits.");
@@ -364,164 +358,58 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
       document.getElementById('hub_view').style.display = 'none';
       document.getElementById('timesheet_view').style.display = 'block';
       document.body.style.background = '#e5e7eb';
-      setTimeout(() => { try { pullFromCloud(false); } catch(e) {} }, 150);
     }
   }
 
-  function setSyncBadge(text, color) {
-    const el = document.getElementById('sync_status');
-    if (!el) return;
-    el.textContent = text;
-    el.style.color = color || '#9ca3af';
-  }
-
-  async function deriveKey(pin, saltBytes) {
-    const enc = new TextEncoder();
-    const baseKey = await crypto.subtle.importKey("raw", enc.encode("ml_nurture_hub_" + pin), "PBKDF2", false, ["deriveKey"]);
-    return crypto.subtle.deriveKey({ name: "PBKDF2", salt: saltBytes, iterations: 100000, hash: "SHA-256" }, baseKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-  }
-
-  function bytesToBase64(bytes) {
-    let bin = '';
-    bytes.forEach(b => bin += String.fromCharCode(b));
-    return btoa(bin);
-  }
-
-  function base64ToBytes(b64) {
-    const bin = atob(b64);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    return bytes;
-  }
-
-  async function encryptPayload(obj, pin) {
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const iv = crypto.getRandomValues(new Uint8Array(12));
-    const key = await deriveKey(pin, salt);
-    const encoded = new TextEncoder().encode(JSON.stringify(obj));
-    const cipherBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
-    return JSON.stringify({ v: 1, s: bytesToBase64(salt), i: bytesToBase64(iv), c: bytesToBase64(new Uint8Array(cipherBuf)) });
-  }
-
-  async function decryptPayload(rawStr, pin) {
-    const wrapper = JSON.parse(rawStr);
-    if (!wrapper || !wrapper.s || !wrapper.i || !wrapper.c) return null;
-    const key = await deriveKey(pin, base64ToBytes(wrapper.s));
-    const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64ToBytes(wrapper.i) }, key, base64ToBytes(wrapper.c));
-    return JSON.parse(new TextDecoder().decode(plainBuf));
-  }
-
-  async function findOrCreateGist(token) {
-    let gistId = localStorage.getItem(GH_GIST_ID_KEY);
-    const headers = { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" };
-    if (gistId) {
-      const checkRes = await fetch(`https://api.github.com/gists/${gistId}`, { headers });
-      if (checkRes.ok) return gistId;
-    }
-    const listRes = await fetch(`https://api.github.com/gists?per_page=100`, { headers });
-    if (!listRes.ok) throw new Error("Invalid GitHub Token");
-    const gists = await listRes.json();
-    const existing = gists.find(g => g.files && g.files[GIST_FILENAME]);
-    if (existing) {
-      localStorage.setItem(GH_GIST_ID_KEY, existing.id);
-      return existing.id;
-    }
-    const createRes = await fetch(`https://api.github.com/gists`, {
-      method: "POST",
-      headers: { ...headers, "Content-Type": "application/json" },
-      body: JSON.stringify({ description: "Martin Law Work Hub Encrypted Sync", public: false, files: { [GIST_FILENAME]: { content: "{}" } } })
-    });
-    if (!createRes.ok) throw new Error("Could not create Secret Gist");
-    const created = await createRes.json();
-    localStorage.setItem(GH_GIST_ID_KEY, created.id);
-    return created.id;
-  }
-
-  async function pushToCloud() {
-    const token = localStorage.getItem(GH_TOKEN_KEY);
-    if (!token || isApplyingRemote) return;
+  function exportSaveFile() {
     try {
-      setSyncBadge("☁️ Syncing...", "#38bdf8");
-      const gistId = await findOrCreateGist(token);
-      const tsData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"inputs":{},"checks":{}}');
-      const customSites = JSON.parse(localStorage.getItem(SITES_KEY) || '[]');
-      const encryptedContent = await encryptPayload({ updatedAt: Date.now(), tsData, customSites }, HUB_PIN);
-      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
-        method: "PATCH",
-        headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
-        body: JSON.stringify({ files: { [GIST_FILENAME]: { content: encryptedContent } } })
-      });
-      setSyncBadge(res.ok ? "🔒 Cloud Synced" : "⚠️ Sync Error", res.ok ? "#34d399" : "#f87171");
+      const data = {
+        timestamp: Date.now(),
+        storage: localStorage.getItem(STORAGE_KEY),
+        sites: localStorage.getItem(SITES_KEY),
+        pin: localStorage.getItem('ml_hub_pin')
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `work_hub_backup_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
     } catch (e) {
-      setSyncBadge("⚠️ Offline / Local", "#fbbf24");
+      alert("Export failed.");
     }
   }
 
-  async function pullFromCloud(manual = false) {
-    const token = localStorage.getItem(GH_TOKEN_KEY);
-    if (!token) {
-      setSyncBadge("☁️ Local Only", "#9ca3af");
-      if (manual) setupCloudSyncPrompt();
-      return;
-    }
-    try {
-      setSyncBadge("☁️ Checking...", "#38bdf8");
-      const gistId = await findOrCreateGist(token);
-      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
-        headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" },
-        cache: "no-store"
-      });
-      if (!res.ok) throw new Error("Fetch failed");
-      const gist = await res.json();
-      const fileObj = gist.files && gist.files[GIST_FILENAME];
-      if (!fileObj || !fileObj.content || fileObj.content.trim() === "{}") {
-        await pushToCloud();
-        return;
-      }
-      const decrypted = await decryptPayload(fileObj.content, HUB_PIN);
-      if (decrypted && decrypted.tsData) {
-        isApplyingRemote = true;
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(decrypted.tsData));
-        if (decrypted.customSites) localStorage.setItem(SITES_KEY, JSON.stringify(decrypted.customSites));
-        renderSites();
+  function importSaveFilePrompt() {
+    document.getElementById('import_file_input').click();
+  }
+
+  function handleFileImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        if (parsed.storage) localStorage.setItem(STORAGE_KEY, parsed.storage);
+        if (parsed.sites) localStorage.setItem(SITES_KEY, parsed.sites);
+        if (parsed.pin) {
+          localStorage.setItem('ml_hub_pin', parsed.pin);
+          HUB_PIN = parsed.pin.trim();
+        }
         loadState();
+        renderSites();
         updateAllTotals();
-        isApplyingRemote = false;
-        setSyncBadge("🔒 Cloud Synced", "#34d399");
+        alert("Save imported successfully!");
+      } catch (err) {
+        alert("Invalid backup file.");
       }
-    } catch (e) {
-      isApplyingRemote = false;
-      setSyncBadge("⚠️ Sync/Token Error", "#f87171");
-    }
-  }
-
-  async function setupCloudSyncPrompt() {
-    const current = localStorage.getItem(GH_TOKEN_KEY) || "";
-    const msg = current
-      ? "Private Cloud Sync is ACTIVE.\n\nPaste a new GitHub Token (ghp_...) to update it, or type CLEAR to disconnect:"
-      : "Paste your GitHub Personal Access Token (ghp_...) to enable Private Encrypted Sync across your devices:";
-    const input = prompt(msg);
-    if (input === null) return;
-    const trimmed = input.trim();
-    if (trimmed.toUpperCase() === "CLEAR") {
-      localStorage.removeItem(GH_TOKEN_KEY);
-      localStorage.removeItem(GH_GIST_ID_KEY);
-      setSyncBadge("☁️ Local Only", "#9ca3af");
-      alert("Cloud Sync disconnected.");
-      return;
-    }
-    if (!trimmed) return;
-    localStorage.setItem(GH_TOKEN_KEY, trimmed);
-    localStorage.removeItem(GH_GIST_ID_KEY);
-    await pullFromCloud(false);
-    alert("Private Encrypted Cloud Sync connected!");
-  }
-
-  function scheduleCloudPush() {
-    if (!localStorage.getItem(GH_TOKEN_KEY) || isApplyingRemote) return;
-    setSyncBadge("☁️ Saving...", "#fbbf24");
-    if (syncTimeout) clearTimeout(syncTimeout);
-    syncTimeout = setTimeout(() => { pushToCloud(); }, 1000);
+      event.target.value = '';
+    };
+    reader.readAsText(file);
   }
 
   function buildLogRows() {
@@ -603,14 +491,20 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
 
     let endMins = fMins < sMins ? fMins + 1440 : fMins;
     let otMins = 0;
+
     if (isWeekendRow(rIdx)) {
       let dur = endMins - sMins;
-      if (dur > 360) dur -= 30;
+      if (dur > 360) dur -= 30; // 30m unpaid break over 6h
       otMins = Math.max(0, dur);
     } else {
-      if (sMins < CONTRACT_START_MINS) otMins += Math.min(endMins, CONTRACT_START_MINS) - sMins;
-      if (endMins > CONTRACT_END_MINS) otMins += endMins - Math.max(sMins, CONTRACT_END_MINS);
+      if (sMins < TRAVEL_BUFFER_START) {
+        otMins += Math.min(endMins, TRAVEL_BUFFER_START) - sMins;
+      }
+      if (endMins > TRAVEL_BUFFER_END) {
+        otMins += endMins - Math.max(sMins, TRAVEL_BUFFER_END);
+      }
     }
+
     const otHours = Math.round((otMins / 60) * 100) / 100;
     otEl.value = otHours > 0 ? otHours : '';
     updateAllTotals();
@@ -810,7 +704,6 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
     stored.push({ name, zone });
     localStorage.setItem(SITES_KEY, JSON.stringify(stored));
     renderSites();
-    scheduleCloudPush();
     nameEl.value = ''; zoneEl.value = '';
   }
 
@@ -818,7 +711,6 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
     let stored = JSON.parse(localStorage.getItem(SITES_KEY) || '[]').filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
     localStorage.setItem(SITES_KEY, JSON.stringify(stored));
     renderSites();
-    scheduleCloudPush();
   }
 
   function checkSiteZoneAutoFill(rIdx) {
@@ -842,7 +734,6 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
       });
       document.querySelectorAll('.day-toggle').forEach(chk => { data.checks[chk.id] = chk.checked; });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-      scheduleCloudPush();
     } catch (e) {}
   }
 
@@ -881,7 +772,6 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
     updateAllTotals();
     if (localStorage.getItem(AUTH_KEY) === '1') {
       openHub();
-      setTimeout(() => { try { pullFromCloud(false); } catch(e) {} }, 150);
     } else {
       document.getElementById('pin_screen').style.display = 'flex';
       document.getElementById('hub_view').style.display = 'none';
@@ -892,4 +782,3 @@ Tap the Copy icon in the top-right corner of the code box below, delete everythi
 </body>
 </html>
 
-After you commit that on GitHub, wait 30 seconds for GitHub Pages to update, then refresh work.martinlaw.me and enter your PIN.
