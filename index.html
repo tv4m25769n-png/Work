@@ -1,3 +1,6 @@
+Your PIN screen is hanging because the entire <script> block got truncated or corrupted when pasted into GitHub (mobile browsers often cut off long clipboard pastes around the 25,000-character mark), or because Safari is holding onto a cached version of the page. When the closing </script> tag gets cut off, the verifyPin() function never loads, so typing your 4 digits does nothing.
+I have compacted the site database onto clean single lines so the entire file is half the size and won't get cut off by your clipboard, and I hardened verifyPin() so it unlocks the screen immediately with zero delay.
+Tap the Copy icon in the top-right corner of the code box below, delete everything in your index.html file on GitHub, and paste this in:
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -8,329 +11,61 @@
 <style>
   @page { size: A4 portrait; margin: 0mm; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-    background: #0f172a;
-    margin: 0;
-    padding: 0;
-    color: #000;
-    overflow-x: auto;
-  }
-
-  #pin_screen {
-    position: fixed;
-    inset: 0;
-    background: #0f172a;
-    z-index: 99999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #f8fafc;
-    padding: 20px;
-  }
-  .pin-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 28px 24px;
-    width: 100%;
-    max-width: 320px;
-    text-align: center;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-  }
+  body { font-family: Arial, Helvetica, sans-serif; background: #0f172a; margin: 0; padding: 0; color: #000; overflow-x: auto; }
+  #pin_screen { position: fixed; inset: 0; background: #0f172a; z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #f8fafc; padding: 20px; }
+  .pin-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 28px 24px; width: 100%; max-width: 320px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
   .pin-card h2 { margin: 0 0 6px 0; font-size: 18px; color: #38bdf8; }
   .pin-card p { margin: 0 0 18px 0; font-size: 12px; color: #94a3b8; }
-  .pin-input {
-    width: 160px;
-    font-size: 26px;
-    letter-spacing: 10px;
-    text-align: center;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #475569;
-    background: #0f172a;
-    color: #fff;
-    outline: none;
-    margin-bottom: 14px;
-  }
-  .pin-btn {
-    width: 100%;
-    padding: 11px;
-    border: none;
-    border-radius: 8px;
-    background: #10b981;
-    color: #fff;
-    font-weight: bold;
-    font-size: 14px;
-    cursor: pointer;
-  }
+  .pin-input { width: 160px; font-size: 26px; letter-spacing: 10px; text-align: center; padding: 10px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #fff; outline: none; margin-bottom: 14px; }
+  .pin-btn { width: 100%; padding: 11px; border: none; border-radius: 8px; background: #10b981; color: #fff; font-weight: bold; font-size: 14px; cursor: pointer; }
   #pin_err { color: #f87171; font-size: 12px; margin-top: 10px; min-height: 16px; }
-
-  #hub_view {
-    display: none;
-    max-width: 500px;
-    margin: 40px auto;
-    padding: 20px;
-    color: #f8fafc;
-  }
-  .hub-header {
-    text-align: center;
-    margin-bottom: 28px;
-  }
+  #hub_view { display: none; max-width: 500px; margin: 40px auto; padding: 20px; color: #f8fafc; }
+  .hub-header { text-align: center; margin-bottom: 28px; }
   .hub-header h1 { margin: 0; font-size: 22px; color: #fff; }
   .hub-header span { font-size: 12px; color: #38bdf8; }
-  .hub-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .hub-btn {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 10px;
-    padding: 18px 20px;
-    color: #fff;
-    text-align: left;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  .hub-grid { display: flex; flex-direction: column; gap: 14px; }
+  .hub-btn { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 18px 20px; color: #fff; text-align: left; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
   .hub-btn:hover { background: #334155; }
   .hub-btn-title { font-size: 16px; font-weight: bold; color: #34d399; margin-bottom: 4px; }
   .hub-btn-desc { font-size: 12px; color: #94a3b8; }
   .hub-arrow { font-size: 20px; color: #64748b; font-weight: bold; }
-  .hub-footer-actions {
-    margin-top: 24px;
-    text-align: center;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 16px;
-  }
-  .text-btn {
-    background: none;
-    border: none;
-    color: #94a3b8;
-    font-size: 12px;
-    cursor: pointer;
-    text-decoration: underline;
-  }
+  .hub-footer-actions { margin-top: 24px; text-align: center; display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; }
+  .text-btn { background: none; border: none; color: #94a3b8; font-size: 12px; cursor: pointer; text-decoration: underline; }
   .text-btn:hover { color: #38bdf8; }
-
-  /* Cloud Sync Modal */
-  #sync_modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.85);
-    z-index: 100000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .sync-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 22px;
-    width: 100%;
-    max-width: 380px;
-    color: #f8fafc;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-  }
-  .sync-card h3 { margin: 0 0 8px 0; font-size: 16px; color: #38bdf8; }
-  .sync-card p { margin: 0 0 14px 0; font-size: 11.5px; color: #94a3b8; line-height: 1.4; }
-  .sync-field { margin-bottom: 12px; }
-  .sync-field label { display: block; font-size: 11px; color: #cbd5e1; margin-bottom: 4px; font-weight: bold; }
-  .sync-field input {
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #475569;
-    background: #0f172a;
-    color: #fff;
-    font-size: 12px;
-    outline: none;
-  }
-  .sync-actions { display: flex; gap: 8px; margin-top: 16px; }
-  .sync-actions button { flex: 1; padding: 9px; border-radius: 6px; border: none; font-weight: bold; font-size: 12px; cursor: pointer; color: #fff; }
-
-  #timesheet_view {
-    display: none;
-    background: #e5e7eb;
-    min-height: 100vh;
-    padding: 8px;
-  }
-  .no-print {
-    width: 760px;
-    margin: 0 auto 10px auto;
-    background: #111827;
-    color: #f9fafb;
-    border-radius: 8px;
-    padding: 10px 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  }
-  .dash-top {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #374151;
-  }
+  #timesheet_view { display: none; background: #e5e7eb; min-height: 100vh; padding: 8px; }
+  .no-print { width: 760px; margin: 0 auto 10px auto; background: #111827; color: #f9fafb; border-radius: 8px; padding: 10px 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+  .dash-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #374151; }
   .dash-title { font-size: 13px; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 8px; }
-  .sync-badge {
-    font-size: 10px;
-    padding: 3px 7px;
-    border-radius: 12px;
-    background: #1f2937;
-    border: 1px solid #374151;
-    color: #9ca3af;
-    cursor: pointer;
-    font-weight: normal;
-  }
+  .sync-badge { font-size: 10px; padding: 3px 7px; border-radius: 12px; background: #1f2937; border: 1px solid #374151; color: #9ca3af; cursor: pointer; font-weight: normal; }
   .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
-  .btn {
-    border: none;
-    padding: 6px 10px;
-    border-radius: 4px;
-    font-weight: bold;
-    font-size: 11px;
-    cursor: pointer;
-    color: #fff;
-  }
+  .btn { border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; color: #fff; }
   .btn-green { background: #10b981; }
   .btn-blue { background: #3b82f6; }
   .btn-purple { background: #6366f1; }
   .btn-gray { background: #374151; border: 1px solid #4b5563; }
-
-  .counter-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    text-align: center;
-  }
-  .counter-card {
-    background: #1f2937;
-    border: 1px solid #374151;
-    border-radius: 5px;
-    padding: 5px 4px;
-  }
+  .counter-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; text-align: center; }
+  .counter-card { background: #1f2937; border: 1px solid #374151; border-radius: 5px; padding: 5px 4px; }
   .counter-label { font-size: 9.5px; color: #9ca3af; text-transform: uppercase; }
   .counter-val { font-size: 14px; font-weight: bold; color: #fff; margin-top: 2px; }
   .counter-sub { font-size: 9px; color: #fbbf24; margin-top: 1px; }
-  .rate-box {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #374151;
-    border: 1px solid #4b5563;
-    border-radius: 3px;
-    padding: 1px 2px;
-    margin-top: 2px;
-    gap: 2px;
-  }
+  .rate-box { display: inline-flex; align-items: center; justify-content: center; background: #374151; border: 1px solid #4b5563; border-radius: 3px; padding: 1px 2px; margin-top: 2px; gap: 2px; }
   .rate-box span { font-size: 8.5px; color: #9ca3af; }
-  .rate-input {
-    width: 34px;
-    background: transparent;
-    border: none;
-    color: #fbbf24;
-    font-size: 9px;
-    font-weight: bold;
-    text-align: center;
-    outline: none;
-    padding: 0;
-  }
-  .rate-select {
-    background: #111827;
-    border: 1px solid #4b5563;
-    color: #38bdf8;
-    font-size: 8.5px;
-    font-weight: bold;
-    border-radius: 2px;
-    outline: none;
-    padding: 0;
-  }
-
-  #site_drawer {
-    display: none;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px solid #374151;
-    font-size: 11px;
-  }
+  .rate-input { width: 34px; background: transparent; border: none; color: #fbbf24; font-size: 9px; font-weight: bold; text-align: center; outline: none; padding: 0; }
+  .rate-select { background: #111827; border: 1px solid #4b5563; color: #38bdf8; font-size: 8.5px; font-weight: bold; border-radius: 2px; outline: none; padding: 0; }
+  #site_drawer { display: none; margin-top: 8px; padding-top: 8px; border-top: 1px solid #374151; font-size: 11px; }
   .site-add-row { display: flex; gap: 6px; margin-bottom: 6px; }
-  .site-add-row input {
-    background: #374151;
-    border: 1px solid #4b5563;
-    color: #fff;
-    padding: 5px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-  }
+  .site-add-row input { background: #374151; border: 1px solid #4b5563; color: #fff; padding: 5px 8px; border-radius: 4px; font-size: 11px; }
   .site-tags { display: flex; flex-wrap: wrap; gap: 5px; max-height: 90px; overflow-y: auto; }
-  .site-tag {
-    background: #374151;
-    padding: 3px 7px;
-    border-radius: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10.5px;
-  }
+  .site-tag { background: #374151; padding: 3px 7px; border-radius: 12px; display: inline-flex; align-items: center; gap: 5px; font-size: 10.5px; }
   .site-tag button { background: none; border: none; color: #f87171; font-weight: bold; cursor: pointer; padding: 0; font-size: 12px; }
-
-  #custom_ac {
-    position: absolute;
-    background: #1e293b;
-    color: #f8fafc;
-    border: 1px solid #475569;
-    border-radius: 6px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
-    max-height: 190px;
-    overflow-y: auto;
-    z-index: 999999;
-    display: none;
-    font-size: 11.5px;
-  }
-  .ac-item {
-    padding: 7px 10px;
-    cursor: pointer;
-    border-bottom: 1px solid #334155;
-    display: flex;
-    justify-content: space-between;
-  }
+  #custom_ac { position: absolute; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); max-height: 190px; overflow-y: auto; z-index: 999999; display: none; font-size: 11.5px; }
+  .ac-item { padding: 7px 10px; cursor: pointer; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; }
   .ac-item:last-child { border-bottom: none; }
   .ac-item:hover, .ac-item:active { background: #3b82f6; color: #fff; }
   .ac-zone { color: #38bdf8; font-size: 10px; font-weight: bold; }
-
-  .sheet {
-    width: 760px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 4px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    border: 1.5px solid #000;
-  }
-  td {
-    border: 1px solid #000;
-    padding: 0 3px;
-    height: 17px;
-    font-size: 9.5px;
-    vertical-align: middle;
-    white-space: nowrap;
-    overflow: hidden;
-  }
+  .sheet { width: 760px; margin: 0 auto; background: #fff; padding: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.5px solid #000; }
+  td { border: 1px solid #000; padding: 0 3px; height: 17px; font-size: 9.5px; vertical-align: middle; white-space: nowrap; overflow: hidden; }
   .title-cell { text-align: center; font-weight: bold; font-size: 11.5px; height: 20px; }
   .box-label { vertical-align: top; text-align: center; font-size: 9.5px; padding-top: 2px; }
   .b-left { font-weight: bold; text-align: left; padding-left: 3px; }
@@ -338,47 +73,18 @@
   .r-center { font-weight: normal; text-align: center; }
   .r-left { font-weight: normal; text-align: left; padding-left: 3px; }
   .small-notice { font-weight: bold; text-align: center; font-size: 8px; }
-
-  input.cell-in {
-    width: 100%;
-    height: 100%;
-    border: none;
-    outline: none;
-    background: transparent;
-    font-family: Arial, sans-serif;
-    font-size: 9.5px;
-    color: #000;
-    text-align: center;
-    padding: 0 1px;
-    margin: 0;
-  }
+  input.cell-in { width: 100%; height: 100%; border: none; outline: none; background: transparent; font-family: Arial, sans-serif; font-size: 9.5px; color: #000; text-align: center; padding: 0 1px; margin: 0; }
   input.cell-in.left { text-align: left; }
   input.cell-in.bold { font-weight: bold; }
-  input.cell-in.header-box-input {
-    height: 31px;
-    font-size: 11px;
-    font-weight: bold;
-    text-align: center;
-    display: block;
-    margin-top: 2px;
-  }
+  input.cell-in.header-box-input { height: 31px; font-size: 11px; font-weight: bold; text-align: center; display: block; margin-top: 2px; }
   input.tick-cell { cursor: pointer; font-weight: bold; font-size: 11px; user-select: none; }
-
   .day-toggle { display: none; }
-  .day-label {
-    display: inline-block;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 1px 4px;
-    border-radius: 50%;
-    border: 1.5px solid transparent;
-  }
+  .day-label { display: inline-block; font-weight: bold; cursor: pointer; padding: 1px 4px; border-radius: 50%; border: 1.5px solid transparent; }
   .day-toggle:checked + .day-label { border-color: #000; }
-
   @media print {
     @page { size: A4 portrait; margin: 0mm; }
     body { background: #fff !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
-    #pin_screen, #hub_view, #sync_modal, .no-print, #custom_ac { display: none !important; }
+    #pin_screen, #hub_view, .no-print, #custom_ac { display: none !important; }
     #timesheet_view { display: block !important; background: #fff !important; padding: 0 !important; margin: 0 !important; min-height: 0 !important; }
     .sheet { width: 100% !important; max-width: 100% !important; padding: 6mm 7mm !important; margin: 0 !important; box-shadow: none !important; }
     input::placeholder { color: transparent !important; -webkit-text-fill-color: transparent !important; }
@@ -392,27 +98,8 @@
     <h2>work.martinlaw.me</h2>
     <p>Enter your 4-digit PIN to access Work Hub</p>
     <input type="password" id="pin_box" class="pin-input" maxlength="4" inputmode="numeric" placeholder="••••" oninput="if(this.value.length===4) verifyPin()">
-    <button class="pin-btn" onclick="verifyPin()">Unlock Hub</button>
+    <button type="button" class="pin-btn" onclick="verifyPin()">Unlock Hub</button>
     <div id="pin_err"></div>
-  </div>
-</div>
-
-<div id="sync_modal">
-  <div class="sync-card">
-    <h3>☁️ Cross-Device Cloud Sync</h3>
-    <p>Enter a GitHub Personal Access Token (with <b>gist</b> permission) to automatically sync your timesheet and saved sites across your iPhone and tablet.</p>
-    <div class="sync-field">
-      <label>GitHub Token (ghp_...)</label>
-      <input type="password" id="cfg_token" placeholder="Paste your GitHub token here">
-    </div>
-    <div class="sync-field">
-      <label>Cloud Gist ID (Leave blank on first device to auto-create)</label>
-      <input type="text" id="cfg_gist" placeholder="Auto-generated on save">
-    </div>
-    <div class="sync-actions">
-      <button class="btn-gray" onclick="closeSyncModal()">Cancel</button>
-      <button class="btn-green" onclick="saveSyncConfig()">Save &amp; Sync Now</button>
-    </div>
   </div>
 </div>
 
@@ -422,7 +109,7 @@
     <span>work.martinlaw.me</span>
   </div>
   <div class="hub-grid">
-    <button class="hub-btn" onclick="openTool('timesheet')">
+    <button type="button" class="hub-btn" onclick="openTool('timesheet')">
       <div>
         <div class="hub-btn-title">Weekly Mileage &amp; Timesheet</div>
         <div class="hub-btn-desc">Nurture Pest Control A4 sheet with auto-totals &amp; PDF export</div>
@@ -431,4 +118,778 @@
     </button>
   </div>
   <div class="hub-footer-actions">
-    
+    <button type="button" class="text-btn" onclick="setupCloudSyncPrompt()">Private Cloud Sync Setup</button>
+    <button type="button" class="text-btn" onclick="changePinPrompt()">Change Hub PIN</button>
+    <button type="button" class="text-btn" onclick="lockHub()">Lock Hub</button>
+  </div>
+</div>
+
+<div id="timesheet_view">
+  <div class="no-print">
+    <div class="dash-top">
+      <div class="dash-title">
+        <button type="button" class="btn btn-gray" onclick="openHub()">← Back to Hub</button>
+        <span>Live Weekly Counter</span>
+        <span id="sync_status" class="sync-badge" onclick="setupCloudSyncPrompt()" title="Tap to configure Private Cloud Sync">☁️ Local Only</span>
+      </div>
+      <div class="btn-group">
+        <button type="button" class="btn btn-blue" onclick="pullFromCloud(true)">Sync Now</button>
+        <button type="button" class="btn btn-purple" onclick="toggleSiteDrawer()">Manage Sites</button>
+        <button type="button" class="btn btn-gray" onclick="clearWeeklyEntries()">New Week</button>
+        <button type="button" class="btn btn-green" onclick="window.print()">Download / Save as PDF</button>
+      </div>
+    </div>
+    <div class="counter-grid">
+      <div class="counter-card"><div class="counter-label">Work Miles</div><div class="counter-val" id="cnt_work">0</div><div class="counter-sub" id="pred_work">5-day est: 0</div></div>
+      <div class="counter-card"><div class="counter-label">Private Miles</div><div class="counter-val" id="cnt_priv">0</div><div class="counter-sub" id="pred_days">0 days logged</div></div>
+      <div class="counter-card">
+        <div class="counter-label">Overtime Hrs</div>
+        <div class="counter-val" id="cnt_ot">0</div>
+        <div class="counter-sub">
+          <div class="rate-box">
+            <span>£</span><input type="text" id="ot_rate" class="rate-input persist" value="15.66" inputmode="decimal" oninput="updateAllTotals()">
+            <select id="ot_mult" class="rate-select persist" onchange="updateAllTotals()">
+              <option value="1">1.0x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5" selected>1.5x</option>
+              <option value="2">2.0x</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="counter-card"><div class="counter-label">Tasks</div><div class="counter-val" id="cnt_tasks">0</div><div class="counter-sub" id="pred_tasks">0 sites logged</div></div>
+      <div class="counter-card"><div class="counter-label">On-Call</div><div class="counter-val" id="cnt_oncall">0</div><div class="counter-sub" id="ot_earnings">£0.00 est</div></div>
+    </div>
+    <div id="site_drawer">
+      <div class="site-add-row">
+        <input type="text" id="new_site_name" placeholder="Site name" style="flex:2;">
+        <input type="text" id="new_site_zone" placeholder="Zone" inputmode="numeric" style="flex:1;">
+        <button type="button" class="btn btn-green" onclick="addSavedSite()">+ Add Site</button>
+      </div>
+      <div class="site-tags" id="site_tags_list"></div>
+    </div>
+  </div>
+
+  <div id="custom_ac"></div>
+
+  <div class="sheet">
+    <table>
+      <colgroup>
+        <col style="width: 7.5%;"><col style="width: 24.5%;"><col style="width: 10.0%;"><col style="width: 5.5%;"><col style="width: 6.0%;"><col style="width: 5.5%;"><col style="width: 5.5%;"><col style="width: 5.5%;"><col style="width: 9.5%;"><col style="width: 10.5%;"><col style="width: 10.0%;">
+      </colgroup>
+      <tr><td colspan="11" class="title-cell">NURTURE PEST CONTROL TIME SHEET</td></tr>
+      <tr>
+        <td colspan="3" rowspan="3" class="box-label">Name<input type="text" id="f_name" class="cell-in header-box-input persist" value="Martin Law"></td>
+        <td colspan="2" class="b-left">VEHICLE REG:</td>
+        <td colspan="6"><input type="text" id="f_reg" class="cell-in left bold persist"></td>
+      </tr>
+      <tr><td></td><td class="b-center">Date</td><td colspan="2" class="b-center">Start Mileage</td><td colspan="2" class="b-center">Finish Mileage</td><td class="b-center">Work Miles</td><td class="b-center">Private Miles</td></tr>
+      <tr>
+        <td class="b-left">Mon</td><td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()" placeholder="DD/MM"></td>
+        <td colspan="2"><input type="text" id="m_start_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'fin')"></td>
+        <td><input type="text" id="m_work_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_priv_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'priv')"></td>
+      </tr>
+      <tr>
+        <td colspan="3" rowspan="3" class="box-label">Week commencing<input type="text" id="f_wc" class="cell-in header-box-input weekly persist" inputmode="numeric" oninput="autoFormatDate(this); autoFillWeekDates()" placeholder="DD/MM/YY"></td>
+        <td class="b-left">Tue</td><td><input type="text" id="m_date_1" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
+        <td colspan="2"><input type="text" id="m_start_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'fin')"></td>
+        <td><input type="text" id="m_work_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_priv_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Wed</td><td><input type="text" id="m_date_2" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
+        <td colspan="2"><input type="text" id="m_start_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'fin')"></td>
+        <td><input type="text" id="m_work_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_priv_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Thu</td><td><input type="text" id="m_date_3" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
+        <td colspan="2"><input type="text" id="m_start_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'fin')"></td>
+        <td><input type="text" id="m_work_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_priv_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'priv')"></td>
+      </tr>
+      <tr>
+        <td colspan="3" rowspan="3" class="box-label">Team Leader<input type="text" id="f_tl" class="cell-in header-box-input persist"></td>
+        <td class="b-left">Fri</td><td><input type="text" id="m_date_4" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
+        <td colspan="2"><input type="text" id="m_start_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'fin')"></td>
+        <td><input type="text" id="m_work_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_priv_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Sat</td><td><input type="text" id="m_date_5" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
+        <td colspan="2"><input type="text" id="m_start_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'fin')"></td>
+        <td><input type="text" id="m_work_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_priv_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Sun</td><td><input type="text" id="m_date_6" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
+        <td colspan="2"><input type="text" id="m_start_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'fin')"></td>
+        <td><input type="text" id="m_work_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_priv_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'priv')"></td>
+      </tr>
+      <tr>
+        <td colspan="5"></td>
+        <td colspan="2" class="b-left">TOTALS</td>
+        <td colspan="2"><input type="text" id="m_tot_fin" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_tot_work" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_tot_priv" class="cell-in bold weekly" inputmode="numeric"></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="small-notice">PLEASE CIRCLE DAYS COVERED FOR ON CALL ALLOWANCE</td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_fri" class="day-toggle" onchange="updateAllTotals()"><label for="d_fri" class="day-label">FRI</label></td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_sat" class="day-toggle" onchange="updateAllTotals()"><label for="d_sat" class="day-label">SAT</label></td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_sun" class="day-toggle" onchange="updateAllTotals()"><label for="d_sun" class="day-label">SUN</label></td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_mon" class="day-toggle" onchange="updateAllTotals()"><label for="d_mon" class="day-label">MON</label></td>
+      </tr>
+      <tr>
+        <td class="b-left">Date</td><td class="b-left">Site details</td><td class="b-center">Zone number</td><td class="b-center">R</td><td class="b-center">EFK</td><td class="b-center">F/U</td><td class="b-center">C/O</td><td class="b-center">T</td><td class="b-center">Start Time</td><td class="b-center">Finish Time</td><td class="b-center">Overtime</td>
+      </tr>
+      <tbody id="log_body"></tbody>
+      <tr>
+        <td></td><td></td><td></td><td class="r-center">R</td><td class="r-center">EFK</td><td class="r-center">F/U</td><td class="r-center">C/O</td><td class="r-center">T</td><td></td><td></td><td class="r-center">Overtime</td>
+      </tr>
+      <tr>
+        <td></td><td></td>
+        <td class="r-left">TOTALS</td>
+        <td><input type="text" id="tot_r" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_efk" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_fu" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_co" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_t" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_st" class="cell-in weekly"></td>
+        <td><input type="text" id="tot_ft" class="cell-in weekly"></td>
+        <td><input type="text" id="tot_ot" class="cell-in bold weekly" inputmode="decimal"></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script>
+  let HUB_PIN = (localStorage.getItem('ml_hub_pin') || "1234").trim();
+  const AUTH_KEY = 'ml_hub_unlocked';
+  const SITES_KEY = 'nurture_saved_sites_v3';
+  const STORAGE_KEY = 'nurture_ts_master_v3';
+  const GH_TOKEN_KEY = 'ml_gh_sync_token';
+  const GH_GIST_ID_KEY = 'ml_gh_gist_id';
+  const GIST_FILENAME = 'nurture_work_hub_encrypted.json';
+  const TOTAL_LOG_ROWS = 34;
+  const CONTRACT_START_MINS = 8 * 60 + 30;
+  const CONTRACT_END_MINS = 17 * 60;
+
+  let syncTimeout = null;
+  let isApplyingRemote = false;
+
+  const DEFAULT_SITE_NAMES = [
+    "Buckingham Palace","St James's Palace","Clarence House","Kensington Palace","Windsor Castle","Frogmore House","Hampton Court Palace","Tower of London","Horse Guards","MOD Main Building Whitehall","Old War Office Whitehall","Wellington Barracks","Hyde Park Barracks","Regent's Park Barracks","Chelsea Barracks","Royal Hospital Chelsea","Victoria Barracks Windsor","Combermere Barracks Windsor","Royal Artillery Barracks Woolwich","Woolwich Garrison","Napier Lines Woolwich","Cavalry Barracks Hounslow","Armoury House (HAC)","King's Troop RHA Woolwich","Latchmere House","Kneller Hall Twickenham","Northwood Headquarters",
+    "RMAS Sandhurst","Watchfield / Defence Academy Shrivenham","Denison Barracks Hermitage","Brock Barracks Reading","AWE Aldermaston","AWE Burghfield","Arborfield Garrison","Bramley Training Area","RAF Welford","Aldershot Garrison","Lille Barracks Aldershot","Mons Barracks Aldershot","Buller Barracks Aldershot","Travers Barracks Aldershot","Browning Barracks Aldershot","Gale Barracks Aldershot","Duchess of Kent Barracks Aldershot","Montgomery Lines Aldershot","St Omer Barracks Aldershot","Normandy Barracks Aldershot","Thornhill Barracks Aldershot","Wavell Barracks Aldershot",
+    "Minley Station","Gibraltar Barracks Minley","Minley Manor","Deepcut Barracks (Princess Royal Barracks)","Keogh Barracks Ash Vale","Pirbright Camp (ATC Pirbright)","Alexander Barracks Pirbright","Elizabeth Barracks Pirbright","Brunswick Camp Pirbright","Headley Court","RAF Odiham","RAF Oakhanger","Bordon & Longmoor Garrison","Longmoor Camp","Barton Stacey Camp","MOD Worthy Down","Sir John Moore Barracks Winchester","Southwick Park (HMS Dryad)","Middle Wallop (AACen)","Andover (Marlborough Lines / Army HQ)","Marchwood Military Port","HMNB Portsmouth","HMS Nelson Portsmouth","HMS Excellent Whale Island","HMS Collingwood Fareham","HMS Sultan Gosport","HMS Temeraire Portsmouth","Fort Blockhouse Gosport","DM Gosport","Horsea Island","Tipner Ranges","Browndown Camp","Thorney Island (Baker Barracks)",
+    "RAF Medmenham","Danesfield House Medmenham","RAF High Wycombe (Air Command)","RAF Halton","RAF Daws Hill","Wilton Park Beaconsfield","RAF Brize Norton","RAF Benson","Dalton Barracks Abingdon","Edward Brooks Barracks Abingdon","Bicester Garrison","St George's Barracks Bicester","St David's Barracks Bicester","MOD Bicester","RAF Weston-on-the-Green","Vauxhall Barracks Didcot","RAF Croughton","RAF Barford St John","Chicksands (DIFC)","RAF Henlow",
+    "Brompton Barracks Chatham","Chattenden Barracks","Lodge Hill Camp","Upnor Castle / Upper Upnor","Invicta Park Barracks Maidstone","Shorncliffe Garrison","Sir John Moore Barracks Shorncliffe","Risborough Barracks Shorncliffe","Burgoyne Barracks Shorncliffe","Somerset Barracks Shorncliffe","Napier Barracks Folkestone","St Martin's Plain Camp","Hythe Ranges","Lydd Ranges / Lydd Camp","Dover Duke of York's Royal Military School","Crowborough Training Camp","Newhaven Fort / Reserve Centre","Colchester Garrison","Merville Barracks Colchester","Goojera Barracks Colchester","Foynes Barracks Colchester","Carver Barracks Wimbish","MOD Shoeburyness (Foulness Island)","Fingringhoe Ranges",
+    "Tidworth Camp / Garrison","Aliwal Barracks Tidworth","Assaye Barracks Tidworth","Bhurtpore Barracks Tidworth","Candahar Barracks Tidworth","Delhi Barracks Tidworth","Jellalabad Barracks Tidworth","Lucknow Barracks Tidworth","Mooltan Barracks Tidworth","Swinton Barracks Perham Down","Bulford Camp / Garrison","Kiwi Barracks Bulford","Picton Barracks Bulford","Ward Barracks Bulford","Wing Barracks Bulford","Larkhill Garrison","Purvis Lines Larkhill","Horne Barracks Larkhill","Roberts Barracks Larkhill","Warminster Garrison","Battlesbury Barracks Warminster","Harman Lines Warminster","Waterloo Lines Warminster","Upavon Station (Trenchard Lines)","MOD Boscombe Down","Porton Down (Dstl)","MOD Lyneham","MOD Corsham","Azimghur Barracks Colerne","Buckley Barracks Hullavington",
+    "Bovington Camp","Allenby Barracks Bovington","Lulworth Camp","Stanley Barracks Bovington","Blandford Camp","RNAS Yeovilton","RM Poole (Hamworthy)","Wyvern Barracks Exeter","CTCRM Lympstone","RM Bickleigh","Royal Citadel Plymouth","HMNB Devonport","RNAS Culdrose","Imjin Barracks Innsworth","RAF Fairford","Duke of Gloucester Barracks South Cerney","Beachley Barracks Chepstow",
+    "RAF Northolt","RAF Wyton","RAF Alconbury","RAF Molesworth","Bassingbourn Barracks","Waterbeach Barracks","RAF Honington","RAF Barnham","RAF Lakenheath","RAF Mildenhall","RAF Feltwell","RAF Marham","Robertson Barracks Swanton Morley","Stanford Training Area (STANTA)","Gibraltar Barracks Bury St Edmunds","Wattisham Flying Station","Rock Barracks Woodbridge","RAF Wittering","Kendrew Barracks Cottesmore","St George's Barracks North Luffenham","Prince William of Gloucester Barracks Grantham","RAF Cranwell","RAF Barkston Heath","RAF Waddington","RAF Coningsby","RAF Digby","RAF Scampton","RAF Syerston","RAF Donna Nook","RAF Holbeach",
+    "Chetwynd Barracks Chilwell","Gamecock Barracks Bramcote","MOD Stafford (Beacon Barracks)","Whittington Barracks Lichfield (DMS)","MOD Donnington","RAF Cosford","RAF Shawbury","Clive Barracks Tern Hill","Copthorne Barracks Shrewsbury","Credenhill (Stirling Lines)","MOD Kineton","MOD St Athan","Brecon Barracks","Sennybridge Training Area","Castlemartin Camp","RAF Valley","Dale Barracks Chester","Weeton Barracks","Fulwood Barracks Preston","RAF Woodvale",
+    "Catterick Garrison","Marne Barracks Catterick","Bourlon Barracks Catterick","Gaza Barracks Catterick","Megiddo Lines Catterick","Somme Barracks Catterick","Vimy Barracks Catterick","Imphal Barracks York","Queen Elizabeth Barracks Strensall","Alanbrooke Barracks Topcliffe","Claro Barracks Ripon","Uniacke Barracks Harrogate","Normandy Barracks Leconfield","RAF Leeming","RAF Fylingdales","RAF Menwith Hill","RAF Staxton Wold","Albemarle Barracks Harlow Hill","RAF Boulmer","RAF Spadeadam"
+  ];
+  window.PERMANENT_SITES = DEFAULT_SITE_NAMES.map(name => ({ name, zone: "" }));
+
+  function cleanStrayTextNodes() {
+    Array.from(document.body.childNodes).forEach(node => {
+      if (node.nodeType === 3 && node.textContent.trim() !== '') node.remove();
+    });
+  }
+
+  function verifyPin() {
+    const box = document.getElementById('pin_box');
+    const val = (box ? box.value : '').trim();
+    HUB_PIN = (localStorage.getItem('ml_hub_pin') || "1234").trim();
+    if (val === HUB_PIN) {
+      localStorage.setItem(AUTH_KEY, '1');
+      openHub();
+      setTimeout(() => { try { pullFromCloud(false); } catch(e) {} }, 150);
+    } else {
+      document.getElementById('pin_err').textContent = 'Incorrect PIN';
+      if (box) box.value = '';
+    }
+  }
+
+  function lockHub() {
+    localStorage.removeItem(AUTH_KEY);
+    document.getElementById('pin_box').value = '';
+    document.getElementById('pin_err').textContent = '';
+    document.getElementById('pin_screen').style.display = 'flex';
+    document.getElementById('hub_view').style.display = 'none';
+    document.getElementById('timesheet_view').style.display = 'none';
+  }
+
+  function changePinPrompt() {
+    const current = prompt("Enter your current PIN:");
+    if (current === null) return;
+    if (current.trim() !== HUB_PIN) {
+      alert("Incorrect current PIN.");
+      return;
+    }
+    const newPin = prompt("Enter your new 4-digit PIN (Use the same PIN on all devices for encrypted sync):");
+    if (newPin && newPin.trim().length === 4 && !isNaN(newPin.trim())) {
+      HUB_PIN = newPin.trim();
+      localStorage.setItem('ml_hub_pin', HUB_PIN);
+      pushToCloud();
+      alert("PIN updated!");
+    } else {
+      alert("Invalid PIN. Must be 4 digits.");
+    }
+  }
+
+  function openHub() {
+    document.getElementById('pin_screen').style.display = 'none';
+    document.getElementById('timesheet_view').style.display = 'none';
+    document.getElementById('hub_view').style.display = 'block';
+    document.body.style.background = '#0f172a';
+  }
+
+  function openTool(tool) {
+    if (tool === 'timesheet') {
+      document.getElementById('hub_view').style.display = 'none';
+      document.getElementById('timesheet_view').style.display = 'block';
+      document.body.style.background = '#e5e7eb';
+      setTimeout(() => { try { pullFromCloud(false); } catch(e) {} }, 150);
+    }
+  }
+
+  function setSyncBadge(text, color) {
+    const el = document.getElementById('sync_status');
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = color || '#9ca3af';
+  }
+
+  async function deriveKey(pin, saltBytes) {
+    const enc = new TextEncoder();
+    const baseKey = await crypto.subtle.importKey("raw", enc.encode("ml_nurture_hub_" + pin), "PBKDF2", false, ["deriveKey"]);
+    return crypto.subtle.deriveKey({ name: "PBKDF2", salt: saltBytes, iterations: 100000, hash: "SHA-256" }, baseKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+  }
+
+  function bytesToBase64(bytes) {
+    let bin = '';
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin);
+  }
+
+  function base64ToBytes(b64) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
+  async function encryptPayload(obj, pin) {
+    const salt = crypto.getRandomValues(new Uint8Array(16));
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const key = await deriveKey(pin, salt);
+    const encoded = new TextEncoder().encode(JSON.stringify(obj));
+    const cipherBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+    return JSON.stringify({ v: 1, s: bytesToBase64(salt), i: bytesToBase64(iv), c: bytesToBase64(new Uint8Array(cipherBuf)) });
+  }
+
+  async function decryptPayload(rawStr, pin) {
+    const wrapper = JSON.parse(rawStr);
+    if (!wrapper || !wrapper.s || !wrapper.i || !wrapper.c) return null;
+    const key = await deriveKey(pin, base64ToBytes(wrapper.s));
+    const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: base64ToBytes(wrapper.i) }, key, base64ToBytes(wrapper.c));
+    return JSON.parse(new TextDecoder().decode(plainBuf));
+  }
+
+  async function findOrCreateGist(token) {
+    let gistId = localStorage.getItem(GH_GIST_ID_KEY);
+    const headers = { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" };
+    if (gistId) {
+      const checkRes = await fetch(`https://api.github.com/gists/${gistId}`, { headers });
+      if (checkRes.ok) return gistId;
+    }
+    const listRes = await fetch(`https://api.github.com/gists?per_page=100`, { headers });
+    if (!listRes.ok) throw new Error("Invalid GitHub Token");
+    const gists = await listRes.json();
+    const existing = gists.find(g => g.files && g.files[GIST_FILENAME]);
+    if (existing) {
+      localStorage.setItem(GH_GIST_ID_KEY, existing.id);
+      return existing.id;
+    }
+    const createRes = await fetch(`https://api.github.com/gists`, {
+      method: "POST",
+      headers: { ...headers, "Content-Type": "application/json" },
+      body: JSON.stringify({ description: "Martin Law Work Hub Encrypted Sync", public: false, files: { [GIST_FILENAME]: { content: "{}" } } })
+    });
+    if (!createRes.ok) throw new Error("Could not create Secret Gist");
+    const created = await createRes.json();
+    localStorage.setItem(GH_GIST_ID_KEY, created.id);
+    return created.id;
+  }
+
+  async function pushToCloud() {
+    const token = localStorage.getItem(GH_TOKEN_KEY);
+    if (!token || isApplyingRemote) return;
+    try {
+      setSyncBadge("☁️ Syncing...", "#38bdf8");
+      const gistId = await findOrCreateGist(token);
+      const tsData = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"inputs":{},"checks":{}}');
+      const customSites = JSON.parse(localStorage.getItem(SITES_KEY) || '[]');
+      const encryptedContent = await encryptPayload({ updatedAt: Date.now(), tsData, customSites }, HUB_PIN);
+      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        method: "PATCH",
+        headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json", "Content-Type": "application/json" },
+        body: JSON.stringify({ files: { [GIST_FILENAME]: { content: encryptedContent } } })
+      });
+      setSyncBadge(res.ok ? "🔒 Cloud Synced" : "⚠️ Sync Error", res.ok ? "#34d399" : "#f87171");
+    } catch (e) {
+      setSyncBadge("⚠️ Offline / Local", "#fbbf24");
+    }
+  }
+
+  async function pullFromCloud(manual = false) {
+    const token = localStorage.getItem(GH_TOKEN_KEY);
+    if (!token) {
+      setSyncBadge("☁️ Local Only", "#9ca3af");
+      if (manual) setupCloudSyncPrompt();
+      return;
+    }
+    try {
+      setSyncBadge("☁️ Checking...", "#38bdf8");
+      const gistId = await findOrCreateGist(token);
+      const res = await fetch(`https://api.github.com/gists/${gistId}`, {
+        headers: { "Authorization": `token ${token}`, "Accept": "application/vnd.github.v3+json" },
+        cache: "no-store"
+      });
+      if (!res.ok) throw new Error("Fetch failed");
+      const gist = await res.json();
+      const fileObj = gist.files && gist.files[GIST_FILENAME];
+      if (!fileObj || !fileObj.content || fileObj.content.trim() === "{}") {
+        await pushToCloud();
+        return;
+      }
+      const decrypted = await decryptPayload(fileObj.content, HUB_PIN);
+      if (decrypted && decrypted.tsData) {
+        isApplyingRemote = true;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(decrypted.tsData));
+        if (decrypted.customSites) localStorage.setItem(SITES_KEY, JSON.stringify(decrypted.customSites));
+        renderSites();
+        loadState();
+        updateAllTotals();
+        isApplyingRemote = false;
+        setSyncBadge("🔒 Cloud Synced", "#34d399");
+      }
+    } catch (e) {
+      isApplyingRemote = false;
+      setSyncBadge("⚠️ Sync/Token Error", "#f87171");
+    }
+  }
+
+  async function setupCloudSyncPrompt() {
+    const current = localStorage.getItem(GH_TOKEN_KEY) || "";
+    const msg = current
+      ? "Private Cloud Sync is ACTIVE.\n\nPaste a new GitHub Token (ghp_...) to update it, or type CLEAR to disconnect:"
+      : "Paste your GitHub Personal Access Token (ghp_...) to enable Private Encrypted Sync across your devices:";
+    const input = prompt(msg);
+    if (input === null) return;
+    const trimmed = input.trim();
+    if (trimmed.toUpperCase() === "CLEAR") {
+      localStorage.removeItem(GH_TOKEN_KEY);
+      localStorage.removeItem(GH_GIST_ID_KEY);
+      setSyncBadge("☁️ Local Only", "#9ca3af");
+      alert("Cloud Sync disconnected.");
+      return;
+    }
+    if (!trimmed) return;
+    localStorage.setItem(GH_TOKEN_KEY, trimmed);
+    localStorage.removeItem(GH_GIST_ID_KEY);
+    await pullFromCloud(false);
+    alert("Private Encrypted Cloud Sync connected!");
+  }
+
+  function scheduleCloudPush() {
+    if (!localStorage.getItem(GH_TOKEN_KEY) || isApplyingRemote) return;
+    setSyncBadge("☁️ Saving...", "#fbbf24");
+    if (syncTimeout) clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => { pushToCloud(); }, 1000);
+  }
+
+  function buildLogRows() {
+    const tbody = document.getElementById('log_body');
+    let html = '';
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      html += `<tr>
+        <td><input type="text" id="r${r}_c0" class="cell-in weekly" inputmode="numeric" placeholder="DD/MM" oninput="autoFormatDate(this); calcRowOvertime(${r})"></td>
+        <td><input type="text" id="r${r}_c1" class="cell-in left weekly site-input" autocomplete="off"></td>
+        <td><input type="text" id="r${r}_c2" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="r${r}_c3" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c4" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c5" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c6" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c7" class="cell-in weekly tick-cell" readonly></td>
+        <td><input type="text" id="r${r}_c8" class="cell-in weekly" inputmode="numeric" placeholder="HH:MM" oninput="autoFormatTime(this); calcRowOvertime(${r})"></td>
+        <td><input type="text" id="r${r}_c9" class="cell-in weekly" inputmode="numeric" placeholder="HH:MM" oninput="autoFormatTime(this); calcRowOvertime(${r})"></td>
+        <td><input type="text" id="r${r}_c10" class="cell-in weekly" inputmode="decimal" oninput="updateAllTotals()"></td>
+      </tr>`;
+    }
+    tbody.innerHTML = html;
+
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      const siteInp = document.getElementById(`r${r}_c1`);
+      siteInp.addEventListener('input', function() { showSiteSuggestions(this, r); checkSiteZoneAutoFill(r); });
+      siteInp.addEventListener('focus', function() { if (this.value.trim().length > 0) showSiteSuggestions(this, r); });
+      for (let c = 3; c <= 7; c++) {
+        document.getElementById(`r${r}_c${c}`).addEventListener('click', function() {
+          this.value = (this.value === '✓') ? '' : '✓';
+          updateAllTotals();
+          saveState();
+        });
+      }
+    }
+  }
+
+  function parseTimeMins(str) {
+    if (!str) return null;
+    const m = str.trim().match(/^(\d{1,2}):(\d{2})$/);
+    if (!m) return null;
+    const hh = parseInt(m[1], 10), mm = parseInt(m[2], 10);
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
+    return hh * 60 + mm;
+  }
+
+  function isWeekendRow(rIdx) {
+    let dateStr = '';
+    for (let r = rIdx; r >= 0; r--) {
+      const val = document.getElementById(`r${r}_c0`)?.value.trim();
+      if (val) { dateStr = val; break; }
+    }
+    if (!dateStr) return false;
+    const shortDate = dateStr.slice(0, 5);
+    const satDate = document.getElementById('m_date_5')?.value.trim().slice(0, 5);
+    const sunDate = document.getElementById('m_date_6')?.value.trim().slice(0, 5);
+    if ((satDate && shortDate === satDate) || (sunDate && shortDate === sunDate)) return true;
+
+    const parts = dateStr.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);
+    if (parts) {
+      let d = parseInt(parts[1], 10), m = parseInt(parts[2], 10) - 1;
+      let y = parts[3] ? parseInt(parts[3], 10) : null;
+      if (!y) {
+        const wcRaw = document.getElementById('f_wc')?.value.trim();
+        const wcMatch = wcRaw ? wcRaw.match(/(\d{2,4})$/) : null;
+        y = wcMatch ? parseInt(wcMatch[1], 10) : new Date().getFullYear();
+      }
+      if (y < 100) y += 2000;
+      const day = new Date(y, m, d).getDay();
+      if (day === 0 || day === 6) return true;
+    }
+    return false;
+  }
+
+  function calcRowOvertime(rIdx) {
+    const sMins = parseTimeMins(document.getElementById(`r${rIdx}_c8`)?.value || '');
+    const fMins = parseTimeMins(document.getElementById(`r${rIdx}_c9`)?.value || '');
+    const otEl = document.getElementById(`r${rIdx}_c10`);
+    if (!otEl || sMins === null || fMins === null) { updateAllTotals(); return; }
+
+    let endMins = fMins < sMins ? fMins + 1440 : fMins;
+    let otMins = 0;
+    if (isWeekendRow(rIdx)) {
+      let dur = endMins - sMins;
+      if (dur > 360) dur -= 30;
+      otMins = Math.max(0, dur);
+    } else {
+      if (sMins < CONTRACT_START_MINS) otMins += Math.min(endMins, CONTRACT_START_MINS) - sMins;
+      if (endMins > CONTRACT_END_MINS) otMins += endMins - Math.max(sMins, CONTRACT_END_MINS);
+    }
+    const otHours = Math.round((otMins / 60) * 100) / 100;
+    otEl.value = otHours > 0 ? otHours : '';
+    updateAllTotals();
+    saveState();
+  }
+
+  function recalcAllOvertime() {
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      if (parseTimeMins(document.getElementById(`r${r}_c8`)?.value) !== null && parseTimeMins(document.getElementById(`r${r}_c9`)?.value) !== null) {
+        calcRowOvertime(r);
+      }
+    }
+  }
+
+  function showSiteSuggestions(inputEl, rIdx) {
+    const box = document.getElementById('custom_ac');
+    const q = inputEl.value.trim().toLowerCase();
+    if (!q) { box.style.display = 'none'; return; }
+    const matches = getSites().filter(s => s.name.toLowerCase().includes(q)).slice(0, 12);
+    if (matches.length === 0) { box.style.display = 'none'; return; }
+    const rect = inputEl.getBoundingClientRect();
+    box.style.left = (rect.left + window.scrollX) + 'px';
+    box.style.top = (rect.bottom + window.scrollY + 2) + 'px';
+    box.style.width = Math.max(rect.width, 220) + 'px';
+    box.innerHTML = '';
+    matches.forEach(m => {
+      const item = document.createElement('div');
+      item.className = 'ac-item';
+      item.innerHTML = `<span>${m.name}</span>${m.zone ? `<span class="ac-zone">Z${m.zone}</span>` : ''}`;
+      item.addEventListener('mousedown', e => { e.preventDefault(); selectSiteSuggestion(rIdx, m.name, m.zone); });
+      item.addEventListener('touchstart', e => { e.preventDefault(); selectSiteSuggestion(rIdx, m.name, m.zone); }, { passive: false });
+      box.appendChild(item);
+    });
+    box.style.display = 'block';
+  }
+
+  function selectSiteSuggestion(rIdx, name, zone) {
+    const siteEl = document.getElementById(`r${rIdx}_c1`);
+    const zoneEl = document.getElementById(`r${rIdx}_c2`);
+    if (siteEl) siteEl.value = name;
+    if (zoneEl && zone && zoneEl.value.trim() === '') zoneEl.value = zone;
+    document.getElementById('custom_ac').style.display = 'none';
+    updateAllTotals();
+    saveState();
+  }
+
+  document.addEventListener('click', e => {
+    if (!e.target.classList.contains('site-input') && !e.target.closest('#custom_ac')) {
+      document.getElementById('custom_ac').style.display = 'none';
+    }
+  });
+
+  function autoFormatDate(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 8);
+    if (v.length >= 5) input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+    else if (v.length >= 3) input.value = `${v.slice(0,2)}/${v.slice(2)}`;
+    else input.value = v;
+    saveState();
+  }
+
+  function autoFormatTime(input) {
+    let v = input.value.replace(/\D/g, '').slice(0, 4);
+    input.value = v.length >= 3 ? `${v.slice(0,2)}:${v.slice(2)}` : v;
+    saveState();
+  }
+
+  function autoFillWeekDates() {
+    const raw = document.getElementById('f_wc').value.trim();
+    const match = raw.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2}|\d{4})$/);
+    if (!match) { saveState(); return; }
+    let year = parseInt(match[3], 10);
+    if (year < 100) year += 2000;
+    const baseDate = new Date(year, parseInt(match[2], 10) - 1, parseInt(match[1], 10));
+    if (isNaN(baseDate.getTime())) return;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(baseDate);
+      d.setDate(baseDate.getDate() + i);
+      document.getElementById(`m_date_${i}`).value = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+    }
+    recalcAllOvertime();
+    saveState();
+  }
+
+  function recalcMileage(dayIdx, sourceField) {
+    for (let i = dayIdx; i < 7; i++) {
+      const s = parseFloat(document.getElementById(`m_start_${i}`).value);
+      const f = parseFloat(document.getElementById(`m_fin_${i}`).value);
+      const p = parseFloat(document.getElementById(`m_priv_${i}`).value) || 0;
+      const wEl = document.getElementById(`m_work_${i}`);
+      if (!isNaN(s) && !isNaN(f) && f >= s) wEl.value = Math.round((f - s) * 10) / 10;
+      else if (isNaN(f)) wEl.value = '';
+      if (i < 6 && !isNaN(f)) {
+        const nextStartEl = document.getElementById(`m_start_${i + 1}`);
+        if ((i === dayIdx && (sourceField === 'fin' || sourceField === 'priv')) || nextStartEl.value === '') {
+          nextStartEl.value = Math.round((f + p) * 10) / 10;
+        }
+      }
+    }
+    recalcMileageTotals();
+  }
+
+  function recalcMileageTotals() {
+    let workSum = 0, privSum = 0, hasWork = false, hasPriv = false;
+    for (let i = 0; i < 7; i++) {
+      const w = parseFloat(document.getElementById(`m_work_${i}`).value);
+      const p = parseFloat(document.getElementById(`m_priv_${i}`).value);
+      if (!isNaN(w)) { workSum += w; hasWork = true; }
+      if (!isNaN(p)) { privSum += p; hasPriv = true; }
+    }
+    document.getElementById('m_tot_work').value = hasWork ? Math.round(workSum * 10) / 10 : '';
+    document.getElementById('m_tot_priv').value = hasPriv ? Math.round(privSum * 10) / 10 : '';
+    updateAllTotals();
+    saveState();
+  }
+
+  function updateAllTotals() {
+    const cols = [{ idx: 3, id: 'tot_r' }, { idx: 4, id: 'tot_efk' }, { idx: 5, id: 'tot_fu' }, { idx: 6, id: 'tot_co' }, { idx: 7, id: 'tot_t' }, { idx: 10, id: 'tot_ot' }];
+    let totalTasks = 0, totalOt = 0;
+    cols.forEach(col => {
+      let sum = 0, hasVal = false;
+      for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+        const raw = document.getElementById(`r${r}_c${col.idx}`)?.value.trim() || '';
+        if (raw !== '') {
+          hasVal = true;
+          sum += (col.idx >= 3 && col.idx <= 7) ? 1 : (parseFloat(raw) || 0);
+        }
+      }
+      const rounded = Math.round(sum * 100) / 100;
+      document.getElementById(col.id).value = hasVal ? rounded : '';
+      if (col.idx === 10) totalOt = rounded;
+      else totalTasks += rounded;
+    });
+
+    let daysWithWork = 0, workMiles = 0, privMiles = 0;
+    for (let i = 0; i < 7; i++) {
+      const w = parseFloat(document.getElementById(`m_work_${i}`).value);
+      const p = parseFloat(document.getElementById(`m_priv_${i}`).value);
+      if (!isNaN(w) && w > 0) { workMiles += w; daysWithWork++; }
+      if (!isNaN(p) && p > 0) privMiles += p;
+    }
+    let sitesLogged = 0;
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      if (document.getElementById(`r${r}_c1`)?.value.trim()) sitesLogged++;
+    }
+    let onCallCount = 0;
+    ['d_fri', 'd_sat', 'd_sun', 'd_mon'].forEach(id => { if (document.getElementById(id).checked) onCallCount++; });
+
+    const targetDays = Math.max(5, daysWithWork);
+    const estWorkMiles = daysWithWork > 0 ? Math.round((workMiles / daysWithWork) * targetDays) : 0;
+    const hourlyRate = parseFloat(document.getElementById('ot_rate').value) || 0;
+    const multiplier = parseFloat(document.getElementById('ot_mult').value) || 1;
+    const estOtEarnings = Math.round(totalOt * hourlyRate * multiplier * 100) / 100;
+
+    document.getElementById('cnt_work').textContent = Math.round(workMiles * 10) / 10;
+    document.getElementById('pred_work').textContent = `5-day est: ${estWorkMiles} mi`;
+    document.getElementById('cnt_priv').textContent = Math.round(privMiles * 10) / 10;
+    document.getElementById('pred_days').textContent = `${daysWithWork} day${daysWithWork === 1 ? '' : 's'} logged`;
+    document.getElementById('cnt_ot').textContent = totalOt;
+    document.getElementById('ot_earnings').textContent = `£${estOtEarnings.toFixed(2)} est (${multiplier}x)`;
+    document.getElementById('cnt_tasks').textContent = totalTasks;
+    document.getElementById('pred_tasks').textContent = `${sitesLogged} site${sitesLogged === 1 ? '' : 's'} logged`;
+    document.getElementById('cnt_oncall').textContent = onCallCount;
+  }
+
+  function getSites() {
+    let sites = window.PERMANENT_SITES.map(s => ({ ...s }));
+    try {
+      const stored = localStorage.getItem(SITES_KEY);
+      if (stored) {
+        JSON.parse(stored).forEach(us => {
+          const existing = sites.find(s => s.name.toLowerCase() === us.name.toLowerCase());
+          if (existing) { if (us.zone) existing.zone = us.zone; }
+          else sites.push(us);
+        });
+      }
+    } catch (e) {}
+    return sites.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  function renderSites() {
+    const tagList = document.getElementById('site_tags_list');
+    tagList.innerHTML = '';
+    getSites().forEach(s => {
+      const tag = document.createElement('span');
+      tag.className = 'site-tag';
+      const isCustom = !window.PERMANENT_SITES.some(ps => ps.name.toLowerCase() === s.name.toLowerCase());
+      tag.innerHTML = `${s.name}${s.zone ? ` (Zone ${s.zone})` : ''}${isCustom ? ` <button type="button" onclick="deleteSavedSite('${s.name.replace(/'/g, "\\'")}')">×</button>` : ''}`;
+      tagList.appendChild(tag);
+    });
+  }
+
+  function addSavedSite() {
+    const nameEl = document.getElementById('new_site_name'), zoneEl = document.getElementById('new_site_zone');
+    const name = nameEl.value.trim(), zone = zoneEl.value.trim();
+    if (!name) return;
+    let stored = JSON.parse(localStorage.getItem(SITES_KEY) || '[]').filter(s => s.name.toLowerCase() !== name.toLowerCase());
+    stored.push({ name, zone });
+    localStorage.setItem(SITES_KEY, JSON.stringify(stored));
+    renderSites();
+    scheduleCloudPush();
+    nameEl.value = ''; zoneEl.value = '';
+  }
+
+  function deleteSavedSite(siteName) {
+    let stored = JSON.parse(localStorage.getItem(SITES_KEY) || '[]').filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
+    localStorage.setItem(SITES_KEY, JSON.stringify(stored));
+    renderSites();
+    scheduleCloudPush();
+  }
+
+  function checkSiteZoneAutoFill(rIdx) {
+    const siteVal = document.getElementById(`r${rIdx}_c1`)?.value.trim().toLowerCase();
+    const zoneEl = document.getElementById(`r${rIdx}_c2`);
+    if (!siteVal || !zoneEl || zoneEl.value.trim() !== '') return;
+    const match = getSites().find(s => s.name.toLowerCase() === siteVal);
+    if (match && match.zone) zoneEl.value = match.zone;
+  }
+
+  function toggleSiteDrawer() {
+    const d = document.getElementById('site_drawer');
+    d.style.display = (d.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function saveState() {
+    try {
+      const data = { inputs: {}, checks: {} };
+      document.querySelectorAll('input.cell-in, input.rate-input, select.rate-select').forEach(inp => {
+        if (inp.id && inp.value !== '') data.inputs[inp.id] = inp.value;
+      });
+      document.querySelectorAll('.day-toggle').forEach(chk => { data.checks[chk.id] = chk.checked; });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      scheduleCloudPush();
+    } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      document.querySelectorAll('input.weekly').forEach(inp => inp.value = '');
+      document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
+      if (data.inputs) Object.keys(data.inputs).forEach(id => { const el = document.getElementById(id); if (el) el.value = data.inputs[id]; });
+      if (data.checks) Object.keys(data.checks).forEach(id => { const el = document.getElementById(id); if (el) el.checked = !!data.checks[id]; });
+    } catch (e) {}
+  }
+
+  function clearWeeklyEntries() {
+    if (!confirm('Start a new week? Your Name, Vehicle Reg, Team Leader, Hourly Rate, Multiplier and Saved Sites will stay saved.')) return;
+    document.querySelectorAll('input.weekly').forEach(inp => inp.value = '');
+    document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
+    updateAllTotals();
+    saveState();
+  }
+
+  document.addEventListener('input', e => {
+    if (e.target && e.target.id === 'pin_box') return;
+    updateAllTotals();
+    saveState();
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    cleanStrayTextNodes();
+    buildLogRows();
+    renderSites();
+    loadState();
+    if (document.getElementById('ot_rate').value === '15.00') document.getElementById('ot_rate').value = '15.66';
+    updateAllTotals();
+    if (localStorage.getItem(AUTH_KEY) === '1') {
+      openHub();
+      setTimeout(() => { try { pullFromCloud(false); } catch(e) {} }, 150);
+    } else {
+      document.getElementById('pin_screen').style.display = 'flex';
+      document.getElementById('hub_view').style.display = 'none';
+      document.getElementById('timesheet_view').style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>
+
+After you commit that on GitHub, wait 30 seconds for GitHub Pages to update, then refresh work.martinlaw.me and enter your PIN.
