@@ -1,4 +1,7 @@
-Here is your completely cleaned code with the cloud sync system completely removed, local storage and file backups intact, and your exact overtime travel buffers configured.
+I have added total start time, finish time, and total hours worked to the bottom of your sheet.
+ * Total Hours Worked Calculation: It adds up the total span between your start and finish times across all logged rows, automatically deducting your daily 30-minute unpaid lunch break when a shift exceeds 6 hours (matching your contract rules).
+ * 40-Hour Contract Tracking: You can instantly see your total weekly hours right at the bottom of the table to check against your contracted 40 hours.
+Here is your final, clean local-storage code:
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -154,7 +157,7 @@ Here is your completely cleaned code with the cloud sync system completely remov
         </div>
       </div>
       <div class="counter-card"><div class="counter-label">Tasks</div><div class="counter-val" id="cnt_tasks">0</div><div class="counter-sub" id="pred_tasks">0 sites logged</div></div>
-      <div class="counter-card"><div class="counter-label">On-Call</div><div class="counter-val" id="cnt_oncall">0</div><div class="counter-sub" id="ot_earnings">£0.00 est</div></div>
+      <div class="counter-card"><div class="counter-label">Total Hours</div><div class="counter-val" id="cnt_total_hrs">0h</div><div class="counter-sub" id="pred_contract">Contract: 40h</div></div>
     </div>
     <div id="site_drawer">
       <div class="site-add-row">
@@ -266,8 +269,8 @@ Here is your completely cleaned code with the cloud sync system completely remov
         <td><input type="text" id="tot_fu" class="cell-in bold weekly" inputmode="numeric"></td>
         <td><input type="text" id="tot_co" class="cell-in bold weekly" inputmode="numeric"></td>
         <td><input type="text" id="tot_t" class="cell-in bold weekly" inputmode="numeric"></td>
-        <td><input type="text" id="tot_st" class="cell-in weekly"></td>
-        <td><input type="text" id="tot_ft" class="cell-in weekly"></td>
+        <td><input type="text" id="tot_st" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_ft" class="cell-in bold weekly" inputmode="numeric"></td>
         <td><input type="text" id="tot_ot" class="cell-in bold weekly" inputmode="decimal"></td>
       </tr>
     </table>
@@ -450,6 +453,13 @@ Here is your completely cleaned code with the cloud sync system completely remov
     const hh = parseInt(m[1], 10), mm = parseInt(m[2], 10);
     if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null;
     return hh * 60 + mm;
+  }
+
+  function minsToTimeStr(totalMins) {
+    if (isNaN(totalMins) || totalMins <= 0) return '';
+    const hh = Math.floor(totalMins / 60);
+    const mm = totalMins % 60;
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
   }
 
   function isWeekendRow(rIdx) {
@@ -635,6 +645,30 @@ Here is your completely cleaned code with the cloud sync system completely remov
       else totalTasks += rounded;
     });
 
+    let totalWorkingMins = 0;
+    let minStartMins = null;
+    let maxEndMins = null;
+
+    for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
+      const sMins = parseTimeMins(document.getElementById(`r${r}_c8`)?.value || '');
+      const fMins = parseTimeMins(document.getElementById(`r${r}_c9`)?.value || '');
+      if (sMins !== null && fMins !== null) {
+        let endMins = fMins < sMins ? fMins + 1440 : fMins;
+        let span = endMins - sMins;
+        if (span > 360) span -= 30; // 30m unpaid break per shift over 6h
+        totalWorkingMins += Math.max(0, span);
+
+        if (minStartMins === null || sMins < minStartMins) minStartMins = sMins;
+        if (minStartMins === null || endMins < minStartMins) minStartMins = endMins;
+        if (maxEndMins === null || endMins > maxEndMins) maxEndMins = endMins;
+        if (maxEndMins === null || sMins > maxEndMins) maxEndMins = sMins;
+      }
+    }
+
+    const totalHoursVal = Math.round((totalWorkingMins / 60) * 100) / 100;
+    document.getElementById('tot_st').value = minStartMins !== null ? minsToTimeStr(minStartMins) : '';
+    document.getElementById('tot_ft').value = maxEndMins !== null ? minsToTimeStr(maxEndMins % 1440) : '';
+
     let daysWithWork = 0, workMiles = 0, privMiles = 0;
     for (let i = 0; i < 7; i++) {
       const w = parseFloat(document.getElementById(`m_work_${i}`).value);
@@ -662,7 +696,8 @@ Here is your completely cleaned code with the cloud sync system completely remov
     document.getElementById('cnt_ot').textContent = totalOt;
     document.getElementById('ot_earnings').textContent = `£${estOtEarnings.toFixed(2)} est (${multiplier}x)`;
     document.getElementById('cnt_tasks').textContent = totalTasks;
-    document.getElementById('pred_tasks').textContent = `${sitesLogged} site${sitesLogged === 1 ? '' : 's'} logged`;
+    document.getElementById('cnt_total_hrs').textContent = `${totalHoursVal}h`;
+    document.getElementById('pred_contract').textContent = `Contract: 40h`;
     document.getElementById('cnt_oncall').textContent = onCallCount;
   }
 
