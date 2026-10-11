@@ -68,7 +68,7 @@
   }
   #pin_err { color: #f87171; font-size: 12px; margin-top: 10px; min-height: 16px; }
 
-  /* 2. WORK HUB MENU */
+  /* 2. WORK HUB MENU (work.martinlaw.me) */
   #hub_view {
     display: none;
     max-width: 500px;
@@ -98,12 +98,14 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: background 0.15s;
   }
   .hub-btn:hover { background: #334155; }
   .hub-btn-title { font-size: 16px; font-weight: bold; color: #34d399; margin-bottom: 4px; }
   .hub-btn-desc { font-size: 12px; color: #94a3b8; }
   .hub-arrow { font-size: 20px; color: #64748b; font-weight: bold; }
   .hub-btn.disabled { opacity: 0.6; cursor: default; }
+  .hub-btn.disabled .hub-btn-title { color: #cbd5e1; }
 
   /* 3. TIMESHEET VIEW */
   #timesheet_view {
@@ -112,6 +114,7 @@
     min-height: 100vh;
     padding: 8px;
   }
+
   .no-print {
     width: 760px;
     margin: 0 auto 10px auto;
@@ -189,7 +192,15 @@
     gap: 5px;
     font-size: 10.5px;
   }
-  .site-tag button { background: none; border: none; color: #f87171; font-weight: bold; cursor: pointer; padding: 0; font-size: 12px; }
+  .site-tag button {
+    background: none;
+    border: none;
+    color: #f87171;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0;
+    font-size: 12px;
+  }
 
   /* A4 Sheet */
   .sheet {
@@ -214,13 +225,29 @@
     white-space: nowrap;
     overflow: hidden;
   }
-  .title-cell { text-align: center; font-weight: bold; font-size: 11.5px; height: 19px; }
-  .box-label { vertical-align: top; text-align: center; font-size: 9.5px; padding-top: 2px; }
+  .title-cell {
+    text-align: center;
+    font-weight: bold;
+    font-size: 11.5px;
+    height: 19px;
+    letter-spacing: 0.2px;
+  }
+  .box-label {
+    vertical-align: top;
+    text-align: center;
+    font-size: 9.5px;
+    padding-top: 2px;
+  }
   .b-left { font-weight: bold; text-align: left; padding-left: 3px; }
   .b-center { font-weight: bold; text-align: center; }
   .r-center { font-weight: normal; text-align: center; }
   .r-left { font-weight: normal; text-align: left; padding-left: 3px; }
-  .small-notice { font-weight: bold; text-align: center; font-size: 8px; }
+  .small-notice {
+    font-weight: bold;
+    text-align: center;
+    font-size: 8px;
+    letter-spacing: -0.1px;
+  }
 
   input.cell-in {
     width: 100%;
@@ -228,7 +255,7 @@
     border: none;
     outline: none;
     background: transparent;
-    font-family: Arial, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     font-size: 9.5px;
     color: #000;
     text-align: center;
@@ -245,6 +272,13 @@
     display: block;
     margin-top: 2px;
   }
+  input.tick-cell {
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 11px;
+    user-select: none;
+  }
+
   .day-toggle { display: none; }
   .day-label {
     display: inline-block;
@@ -253,6 +287,7 @@
     padding: 1px 4px;
     border-radius: 50%;
     border: 1.5px solid transparent;
+    user-select: none;
   }
   .day-toggle:checked + .day-label { border-color: #000; }
 
@@ -266,6 +301,7 @@
 </head>
 <body>
 
+<!-- 1. PRIVATE PIN SCREEN -->
 <div id="pin_screen">
   <div class="pin-card">
     <h2>work.martinlaw.me</h2>
@@ -276,6 +312,7 @@
   </div>
 </div>
 
+<!-- 2. MAIN WORK HUB DASHBOARD -->
 <div id="hub_view">
   <div class="hub-header">
     <h1>Martin Law — Work Hub</h1>
@@ -289,15 +326,24 @@
       </div>
       <div class="hub-arrow">›</div>
     </button>
+
+    <button class="hub-btn disabled" onclick="alert('Send me a photo of your Expenses sheet whenever you are ready and I will add it right here!')">
+      <div>
+        <div class="hub-btn-title">Expenses Sheet (Ready to Add)</div>
+        <div class="hub-btn-desc">Tap here once we add your expenses template</div>
+      </div>
+      <div class="hub-arrow">+</div>
+    </button>
   </div>
 </div>
 
+<!-- 3. NURTURE TIMESHEET TOOL -->
 <div id="timesheet_view">
   <div class="no-print">
     <div class="dash-top">
       <div class="dash-title">
         <button class="btn btn-gray" onclick="openHub()">← Back to Hub</button>
-        <span>Live Weekly Counter</span>
+        <span>Live Weekly Counter (Hidden on PDF)</span>
       </div>
       <div class="btn-group">
         <button class="btn btn-purple" onclick="toggleSiteDrawer()">Manage Sites</button>
@@ -305,17 +351,42 @@
         <button class="btn btn-green" onclick="window.print()">Download / Save as PDF</button>
       </div>
     </div>
+
     <div class="counter-grid">
-      <div class="counter-card"><div class="counter-label">Work Miles</div><div class="counter-val" id="cnt_work">0</div></div>
-      <div class="counter-card"><div class="counter-label">Private Miles</div><div class="counter-val" id="cnt_priv">0</div></div>
-      <div class="counter-card"><div class="counter-label">Overtime Hrs</div><div class="counter-val" id="cnt_ot">0</div></div>
-      <div class="counter-card"><div class="counter-label">Tasks</div><div class="counter-val" id="cnt_tasks">0</div></div>
-      <div class="counter-card"><div class="counter-label">On-Call</div><div class="counter-val" id="cnt_oncall">0</div></div>
+      <div class="counter-card">
+        <div class="counter-label">Work Miles</div>
+        <div class="counter-val" id="cnt_work">0</div>
+        <div class="counter-sub" id="pred_work">5-day est: 0</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">Private Miles</div>
+        <div class="counter-val" id="cnt_priv">0</div>
+        <div class="counter-sub" id="pred_days">0 days logged</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">Overtime Hrs</div>
+        <div class="counter-val" id="cnt_ot">0</div>
+        <div class="counter-sub" id="pred_ot">5-day est: 0</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">Tasks (R/EFK/FU/CO/T)</div>
+        <div class="counter-val" id="cnt_tasks">0</div>
+        <div class="counter-sub" id="pred_tasks">0 sites logged</div>
+      </div>
+      <div class="counter-card">
+        <div class="counter-label">On-Call Days</div>
+        <div class="counter-val" id="cnt_oncall">0</div>
+        <div class="counter-sub">Circled</div>
+      </div>
     </div>
+
     <div id="site_drawer">
+      <div style="margin-bottom:4px; color:#d1d5db;">
+        <strong>Saved Sites Auto-Complete:</strong> Add sites below. When you type in <em>Site details</em>, tap a saved site to auto-fill its name and Zone number.
+      </div>
       <div class="site-add-row">
-        <input type="text" id="new_site_name" placeholder="Site name" style="flex:2;">
-        <input type="text" id="new_site_zone" placeholder="Zone" inputmode="numeric" style="flex:1;">
+        <input type="text" id="new_site_name" placeholder="Site name (e.g. RAF Odiham)" style="flex:2;">
+        <input type="text" id="new_site_zone" placeholder="Default Zone (optional)" inputmode="numeric" style="flex:1;">
         <button class="btn btn-green" onclick="addSavedSite()">+ Add Site</button>
       </div>
       <div class="site-tags" id="site_tags_list"></div>
@@ -327,7 +398,17 @@
   <div class="sheet">
     <table>
       <colgroup>
-        <col style="width: 7.2%;"><col style="width: 19.3%;"><col style="width: 14.5%;"><col style="width: 5.8%;"><col style="width: 6.2%;"><col style="width: 5.8%;"><col style="width: 5.8%;"><col style="width: 6.4%;"><col style="width: 8.8%;"><col style="width: 9.7%;"><col style="width: 10.5%;">
+        <col style="width: 7.2%;">
+        <col style="width: 19.3%;">
+        <col style="width: 14.5%;">
+        <col style="width: 5.8%;">
+        <col style="width: 6.2%;">
+        <col style="width: 5.8%;">
+        <col style="width: 5.8%;">
+        <col style="width: 6.4%;">
+        <col style="width: 8.8%;">
+        <col style="width: 9.7%;">
+        <col style="width: 10.5%;">
       </colgroup>
       <tr><td colspan="11" class="title-cell">NURTURE PEST CONTROL TIME SHEET</td></tr>
       <tr>
@@ -337,54 +418,61 @@
       </tr>
       <tr><td></td><td class="b-center">Date</td><td colspan="2" class="b-center">Start Mileage</td><td colspan="2" class="b-center">Finish Mileage</td><td class="b-center">Work Miles</td><td class="b-center">Private Miles</td></tr>
       <tr>
-        <td class="b-left">Mon</td><td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Mon</td>
+        <td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric"></td>
         <td colspan="2"><input type="text" id="m_start_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'fin')"></td>
-        <td><input type="text" id="m_work_0" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_work_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'priv')"></td>
       </tr>
       <tr>
         <td colspan="3" rowspan="3" class="box-label">Week commencing<input type="text" id="f_wc" class="cell-in header-box-input weekly" inputmode="numeric" oninput="autoFillWeekDates()"></td>
-        <td class="b-left">Tue</td><td><input type="text" id="m_date_1" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Tue</td>
+        <td><input type="text" id="m_date_1" class="cell-in weekly" inputmode="numeric"></td>
         <td colspan="2"><input type="text" id="m_start_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'fin')"></td>
-        <td><input type="text" id="m_work_1" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_work_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Wed</td><td><input type="text" id="m_date_2" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Wed</td>
+        <td><input type="text" id="m_date_2" class="cell-in weekly" inputmode="numeric"></td>
         <td colspan="2"><input type="text" id="m_start_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'fin')"></td>
-        <td><input type="text" id="m_work_2" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_work_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Thu</td><td><input type="text" id="m_date_3" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Thu</td>
+        <td><input type="text" id="m_date_3" class="cell-in weekly" inputmode="numeric"></td>
         <td colspan="2"><input type="text" id="m_start_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'fin')"></td>
-        <td><input type="text" id="m_work_3" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_work_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'priv')"></td>
       </tr>
       <tr>
         <td colspan="3" rowspan="3" class="box-label">Team Leader<input type="text" id="f_tl" class="cell-in header-box-input persist"></td>
-        <td class="b-left">Fri</td><td><input type="text" id="m_date_4" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Fri</td>
+        <td><input type="text" id="m_date_4" class="cell-in weekly" inputmode="numeric"></td>
         <td colspan="2"><input type="text" id="m_start_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'fin')"></td>
-        <td><input type="text" id="m_work_4" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_work_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Sat</td><td><input type="text" id="m_date_5" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Sat</td>
+        <td><input type="text" id="m_date_5" class="cell-in weekly" inputmode="numeric"></td>
         <td colspan="2"><input type="text" id="m_start_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'fin')"></td>
-        <td><input type="text" id="m_work_5" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_work_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Sun</td><td><input type="text" id="m_date_6" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Sun</td>
+        <td><input type="text" id="m_date_6" class="cell-in weekly" inputmode="numeric"></td>
         <td colspan="2"><input type="text" id="m_start_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'fin')"></td>
-        <td><input type="text" id="m_work_6" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_work_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'priv')"></td>
       </tr>
       <tr>
@@ -395,7 +483,7 @@
         <td><input type="text" id="m_tot_priv" class="cell-in bold weekly" inputmode="numeric"></td>
       </tr>
       <tr>
-        <td colspan="3" class="small-notice">CIRCLE DAYS FOR ON CALL</td>
+        <td colspan="3" class="small-notice">PLEASE CIRCLE DAYS COVERED FOR ON CALL ALLOWANCE</td>
         <td></td>
         <td class="b-center"><input type="checkbox" id="d_fri" class="day-toggle" onchange="updateAllTotals()"><label for="d_fri" class="day-label">FRI</label></td>
         <td></td>
@@ -405,10 +493,12 @@
         <td></td>
         <td class="b-center"><input type="checkbox" id="d_mon" class="day-toggle" onchange="updateAllTotals()"><label for="d_mon" class="day-label">MON</label></td>
       </tr>
-      <tr><td class="b-left">Date</td><td class="b-left">Site details</td><td class="b-center">Zone</td><td class="b-center">R</td><td class="b-center">EFK</td><td class="b-center">F/U</td><td class="b-center">C/O</td><td class="b-center">T</td><td class="b-center">Start</td><td class="b-center">Finish</td><td class="b-center">OT</td></tr>
+      <tr><td class="b-left">Date</td><td class="b-left">Site details</td><td class="b-center">Zone number</td><td class="b-center">R</td><td class="b-center">EFK</td><td class="b-center">F/U</td><td class="b-center">C/O</td><td class="b-center">T</td><td class="b-center">Start Time</td><td class="b-center">Finish Time</td><td class="b-center">Overtime</td></tr>
+
       <tbody id="log_body">
         <tr><td><input type="text" class="cell-in weekly"></td><td colspan="7"><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <!-- 36 Rows -->
+        <!-- 36 Standard Rows -->
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
         <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
         <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
         <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
@@ -445,9 +535,12 @@
         <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
         <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
       </tbody>
-      <tr><td></td><td></td><td></td><td class="r-center">R</td><td class="r-center">EFK</td><td class="r-center">F/U</td><td class="r-center">C/O</td><td class="r-center">T</td><td></td><td></td><td class="r-center">OT</td></tr>
+
+      <tr><td></td><td></td><td></td><td class="r-center">R</td><td class="r-center">EFK</td><td class="r-center">F/U</td><td class="r-center">C/O</td><td class="r-center">T</td><td></td><td></td><td class="r-center">Overtime</td></tr>
       <tr>
-        <td></td><td></td><td class="r-left">TOTALS</td>
+        <td></td>
+        <td></td>
+        <td class="r-left">TOTALS</td>
         <td><input type="text" id="tot_r" class="cell-in bold weekly" inputmode="numeric"></td>
         <td><input type="text" id="tot_efk" class="cell-in bold weekly" inputmode="numeric"></td>
         <td><input type="text" id="tot_fu" class="cell-in bold weekly" inputmode="numeric"></td>
@@ -462,7 +555,9 @@
 </div>
 
 <script>
+  // CHANGE YOUR 4-DIGIT PIN HERE:
   const HUB_PIN = "1234";
+
   const STORAGE_KEY = 'nurture_ts_master_v3';
   const SITES_KEY = 'nurture_saved_sites_v3';
   const AUTH_KEY = 'ml_hub_unlocked';
@@ -493,7 +588,7 @@
     }
   }
 
-  window.EMBEDDED_SITES = [
+  window.EMBEDDED_SITES = window.EMBEDDED_SITES || [
     { name: "Aldershot Garrison", zone: "" },
     { name: "Bramley Training Area", zone: "" },
     { name: "Deepcut Barracks", zone: "" },
@@ -600,8 +695,12 @@
 
   function updateAllTotals() {
     const cols = [
-      { idx: 3, id: 'tot_r' }, { idx: 4, id: 'tot_efk' }, { idx: 5, id: 'tot_fu' },
-      { idx: 6, id: 'tot_co' }, { idx: 7, id: 'tot_t' }, { idx: 10, id: 'tot_ot' }
+      { idx: 3, id: 'tot_r' },
+      { idx: 4, id: 'tot_efk' },
+      { idx: 5, id: 'tot_fu' },
+      { idx: 6, id: 'tot_co' },
+      { idx: 7, id: 'tot_t' },
+      { idx: 10, id: 'tot_ot' }
     ];
     let totalTasks = 0, totalOt = 0;
     cols.forEach(col => {
@@ -640,10 +739,18 @@
       if (document.getElementById(id).checked) onCallCount++;
     });
 
+    const targetDays = Math.max(5, daysWithWork);
+    const estWorkMiles = daysWithWork > 0 ? Math.round((workMiles / daysWithWork) * targetDays) : 0;
+    const estOt = daysWithWork > 0 ? Math.round(((totalOt / daysWithWork) * targetDays) * 10) / 10 : 0;
+
     document.getElementById('cnt_work').textContent = Math.round(workMiles * 10) / 10;
+    document.getElementById('pred_work').textContent = `5-day est: ${estWorkMiles} mi`;
     document.getElementById('cnt_priv').textContent = Math.round(privMiles * 10) / 10;
+    document.getElementById('pred_days').textContent = `${daysWithWork} day${daysWithWork === 1 ? '' : 's'} logged`;
     document.getElementById('cnt_ot').textContent = totalOt;
+    document.getElementById('pred_ot').textContent = `5-day est: ${estOt} hrs`;
     document.getElementById('cnt_tasks').textContent = totalTasks;
+    document.getElementById('pred_tasks').textContent = `${sitesLogged} site${sitesLogged === 1 ? '' : 's'} logged`;
     document.getElementById('cnt_oncall').textContent = onCallCount;
   }
 
@@ -673,7 +780,8 @@
       datalist.appendChild(opt);
       const tag = document.createElement('span');
       tag.className = 'site-tag';
-      tag.innerHTML = `${s.name} <button type="button" onclick="deleteSavedSite(${idx})">×</button>`;
+      const zoneText = s.zone ? ` (Zone ${s.zone})` : '';
+      tag.innerHTML = `${s.name}${zoneText} <button type="button" onclick="deleteSavedSite(${idx})">×</button>`;
       tagList.appendChild(tag);
     });
   }
@@ -745,7 +853,7 @@
   }
 
   function clearWeeklyEntries() {
-    if (!confirm('Start a new week?')) return;
+    if (!confirm('Start a new week? Your Name, Vehicle Reg, Team Leader, and Saved Sites will stay saved.')) return;
     document.querySelectorAll('input.weekly').forEach(inp => inp.value = '');
     document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
     updateAllTotals();
