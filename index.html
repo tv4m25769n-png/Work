@@ -68,7 +68,7 @@
   }
   #pin_err { color: #f87171; font-size: 12px; margin-top: 10px; min-height: 16px; }
 
-  /* 2. WORK HUB MENU (work.martinlaw.me) */
+  /* 2. WORK HUB MENU */
   #hub_view {
     display: none;
     max-width: 500px;
@@ -98,14 +98,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    transition: background 0.15s;
   }
   .hub-btn:hover { background: #334155; }
   .hub-btn-title { font-size: 16px; font-weight: bold; color: #34d399; margin-bottom: 4px; }
   .hub-btn-desc { font-size: 12px; color: #94a3b8; }
   .hub-arrow { font-size: 20px; color: #64748b; font-weight: bold; }
   .hub-btn.disabled { opacity: 0.6; cursor: default; }
-  .hub-btn.disabled .hub-btn-title { color: #cbd5e1; }
 
   /* 3. TIMESHEET VIEW */
   #timesheet_view {
@@ -114,7 +112,6 @@
     min-height: 100vh;
     padding: 8px;
   }
-
   .no-print {
     width: 760px;
     margin: 0 auto 10px auto;
@@ -165,6 +162,27 @@
   .counter-label { font-size: 9.5px; color: #9ca3af; text-transform: uppercase; }
   .counter-val { font-size: 14px; font-weight: bold; color: #fff; margin-top: 2px; }
   .counter-sub { font-size: 9px; color: #fbbf24; margin-top: 1px; }
+  .rate-box {
+    display: inline-flex;
+    align-items: center;
+    background: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 3px;
+    padding: 1px 3px;
+    margin-top: 2px;
+  }
+  .rate-box span { font-size: 9px; color: #9ca3af; }
+  .rate-input {
+    width: 36px;
+    background: transparent;
+    border: none;
+    color: #fbbf24;
+    font-size: 9.5px;
+    font-weight: bold;
+    text-align: center;
+    outline: none;
+    padding: 0;
+  }
 
   #site_drawer {
     display: none;
@@ -192,15 +210,7 @@
     gap: 5px;
     font-size: 10.5px;
   }
-  .site-tag button {
-    background: none;
-    border: none;
-    color: #f87171;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0;
-    font-size: 12px;
-  }
+  .site-tag button { background: none; border: none; color: #f87171; font-weight: bold; cursor: pointer; padding: 0; font-size: 12px; }
 
   /* A4 Sheet */
   .sheet {
@@ -225,29 +235,13 @@
     white-space: nowrap;
     overflow: hidden;
   }
-  .title-cell {
-    text-align: center;
-    font-weight: bold;
-    font-size: 11.5px;
-    height: 19px;
-    letter-spacing: 0.2px;
-  }
-  .box-label {
-    vertical-align: top;
-    text-align: center;
-    font-size: 9.5px;
-    padding-top: 2px;
-  }
+  .title-cell { text-align: center; font-weight: bold; font-size: 11.5px; height: 19px; }
+  .box-label { vertical-align: top; text-align: center; font-size: 9.5px; padding-top: 2px; }
   .b-left { font-weight: bold; text-align: left; padding-left: 3px; }
   .b-center { font-weight: bold; text-align: center; }
   .r-center { font-weight: normal; text-align: center; }
   .r-left { font-weight: normal; text-align: left; padding-left: 3px; }
-  .small-notice {
-    font-weight: bold;
-    text-align: center;
-    font-size: 8px;
-    letter-spacing: -0.1px;
-  }
+  .small-notice { font-weight: bold; text-align: center; font-size: 8px; }
 
   input.cell-in {
     width: 100%;
@@ -255,7 +249,7 @@
     border: none;
     outline: none;
     background: transparent;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Arial, sans-serif;
     font-size: 9.5px;
     color: #000;
     text-align: center;
@@ -272,12 +266,7 @@
     display: block;
     margin-top: 2px;
   }
-  input.tick-cell {
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 11px;
-    user-select: none;
-  }
+  input.tick-cell { cursor: pointer; font-weight: bold; font-size: 11px; user-select: none; }
 
   .day-toggle { display: none; }
   .day-label {
@@ -287,7 +276,6 @@
     padding: 1px 4px;
     border-radius: 50%;
     border: 1.5px solid transparent;
-    user-select: none;
   }
   .day-toggle:checked + .day-label { border-color: #000; }
 
@@ -301,7 +289,6 @@
 </head>
 <body>
 
-<!-- 1. PRIVATE PIN SCREEN -->
 <div id="pin_screen">
   <div class="pin-card">
     <h2>work.martinlaw.me</h2>
@@ -312,7 +299,6 @@
   </div>
 </div>
 
-<!-- 2. MAIN WORK HUB DASHBOARD -->
 <div id="hub_view">
   <div class="hub-header">
     <h1>Martin Law — Work Hub</h1>
@@ -326,24 +312,15 @@
       </div>
       <div class="hub-arrow">›</div>
     </button>
-
-    <button class="hub-btn disabled" onclick="alert('Send me a photo of your Expenses sheet whenever you are ready and I will add it right here!')">
-      <div>
-        <div class="hub-btn-title">Expenses Sheet (Ready to Add)</div>
-        <div class="hub-btn-desc">Tap here once we add your expenses template</div>
-      </div>
-      <div class="hub-arrow">+</div>
-    </button>
   </div>
 </div>
 
-<!-- 3. NURTURE TIMESHEET TOOL -->
 <div id="timesheet_view">
   <div class="no-print">
     <div class="dash-top">
       <div class="dash-title">
         <button class="btn btn-gray" onclick="openHub()">← Back to Hub</button>
-        <span>Live Weekly Counter (Hidden on PDF)</span>
+        <span>Live Weekly Counter</span>
       </div>
       <div class="btn-group">
         <button class="btn btn-purple" onclick="toggleSiteDrawer()">Manage Sites</button>
@@ -351,42 +328,23 @@
         <button class="btn btn-green" onclick="window.print()">Download / Save as PDF</button>
       </div>
     </div>
-
     <div class="counter-grid">
-      <div class="counter-card">
-        <div class="counter-label">Work Miles</div>
-        <div class="counter-val" id="cnt_work">0</div>
-        <div class="counter-sub" id="pred_work">5-day est: 0</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-label">Private Miles</div>
-        <div class="counter-val" id="cnt_priv">0</div>
-        <div class="counter-sub" id="pred_days">0 days logged</div>
-      </div>
+      <div class="counter-card"><div class="counter-label">Work Miles</div><div class="counter-val" id="cnt_work">0</div><div class="counter-sub" id="pred_work">5-day est: 0</div></div>
+      <div class="counter-card"><div class="counter-label">Private Miles</div><div class="counter-val" id="cnt_priv">0</div><div class="counter-sub" id="pred_days">0 days logged</div></div>
       <div class="counter-card">
         <div class="counter-label">Overtime Hrs</div>
         <div class="counter-val" id="cnt_ot">0</div>
-        <div class="counter-sub" id="pred_ot">5-day est: 0</div>
+        <div class="counter-sub">
+          <div class="rate-box"><span>£</span><input type="text" id="ot_rate" class="rate-input persist" value="15.00" inputmode="decimal" title="Hourly Rate" oninput="updateAllTotals()"><span>/hr</span></div>
+        </div>
       </div>
-      <div class="counter-card">
-        <div class="counter-label">Tasks (R/EFK/FU/CO/T)</div>
-        <div class="counter-val" id="cnt_tasks">0</div>
-        <div class="counter-sub" id="pred_tasks">0 sites logged</div>
-      </div>
-      <div class="counter-card">
-        <div class="counter-label">On-Call Days</div>
-        <div class="counter-val" id="cnt_oncall">0</div>
-        <div class="counter-sub">Circled</div>
-      </div>
+      <div class="counter-card"><div class="counter-label">Tasks</div><div class="counter-val" id="cnt_tasks">0</div><div class="counter-sub" id="pred_tasks">0 sites logged</div></div>
+      <div class="counter-card"><div class="counter-label">On-Call</div><div class="counter-val" id="cnt_oncall">0</div><div class="counter-sub" id="ot_earnings">£0.00 est</div></div>
     </div>
-
     <div id="site_drawer">
-      <div style="margin-bottom:4px; color:#d1d5db;">
-        <strong>Saved Sites Auto-Complete:</strong> Add sites below. When you type in <em>Site details</em>, tap a saved site to auto-fill its name and Zone number.
-      </div>
       <div class="site-add-row">
-        <input type="text" id="new_site_name" placeholder="Site name (e.g. RAF Odiham)" style="flex:2;">
-        <input type="text" id="new_site_zone" placeholder="Default Zone (optional)" inputmode="numeric" style="flex:1;">
+        <input type="text" id="new_site_name" placeholder="Site name" style="flex:2;">
+        <input type="text" id="new_site_zone" placeholder="Zone" inputmode="numeric" style="flex:1;">
         <button class="btn btn-green" onclick="addSavedSite()">+ Add Site</button>
       </div>
       <div class="site-tags" id="site_tags_list"></div>
@@ -398,17 +356,7 @@
   <div class="sheet">
     <table>
       <colgroup>
-        <col style="width: 7.2%;">
-        <col style="width: 19.3%;">
-        <col style="width: 14.5%;">
-        <col style="width: 5.8%;">
-        <col style="width: 6.2%;">
-        <col style="width: 5.8%;">
-        <col style="width: 5.8%;">
-        <col style="width: 6.4%;">
-        <col style="width: 8.8%;">
-        <col style="width: 9.7%;">
-        <col style="width: 10.5%;">
+        <col style="width: 7.2%;"><col style="width: 19.3%;"><col style="width: 14.5%;"><col style="width: 5.8%;"><col style="width: 6.2%;"><col style="width: 5.8%;"><col style="width: 5.8%;"><col style="width: 6.4%;"><col style="width: 8.8%;"><col style="width: 9.7%;"><col style="width: 10.5%;">
       </colgroup>
       <tr><td colspan="11" class="title-cell">NURTURE PEST CONTROL TIME SHEET</td></tr>
       <tr>
@@ -418,33 +366,29 @@
       </tr>
       <tr><td></td><td class="b-center">Date</td><td colspan="2" class="b-center">Start Mileage</td><td colspan="2" class="b-center">Finish Mileage</td><td class="b-center">Work Miles</td><td class="b-center">Private Miles</td></tr>
       <tr>
-        <td class="b-left">Mon</td>
-        <td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Mon</td><td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)" placeholder="DD/MM"></td>
         <td colspan="2"><input type="text" id="m_start_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'fin')"></td>
         <td><input type="text" id="m_work_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'priv')"></td>
       </tr>
       <tr>
-        <td colspan="3" rowspan="3" class="box-label">Week commencing<input type="text" id="f_wc" class="cell-in header-box-input weekly" inputmode="numeric" oninput="autoFillWeekDates()"></td>
-        <td class="b-left">Tue</td>
-        <td><input type="text" id="m_date_1" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="3" rowspan="3" class="box-label">Week commencing<input type="text" id="f_wc" class="cell-in header-box-input weekly persist" inputmode="numeric" oninput="autoFormatDate(this); autoFillWeekDates()" placeholder="DD/MM/YY"></td>
+        <td class="b-left">Tue</td><td><input type="text" id="m_date_1" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td>
         <td colspan="2"><input type="text" id="m_start_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'fin')"></td>
         <td><input type="text" id="m_work_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Wed</td>
-        <td><input type="text" id="m_date_2" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Wed</td><td><input type="text" id="m_date_2" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td>
         <td colspan="2"><input type="text" id="m_start_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'fin')"></td>
         <td><input type="text" id="m_work_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Thu</td>
-        <td><input type="text" id="m_date_3" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Thu</td><td><input type="text" id="m_date_3" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td>
         <td colspan="2"><input type="text" id="m_start_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'fin')"></td>
         <td><input type="text" id="m_work_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
@@ -452,24 +396,21 @@
       </tr>
       <tr>
         <td colspan="3" rowspan="3" class="box-label">Team Leader<input type="text" id="f_tl" class="cell-in header-box-input persist"></td>
-        <td class="b-left">Fri</td>
-        <td><input type="text" id="m_date_4" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Fri</td><td><input type="text" id="m_date_4" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td>
         <td colspan="2"><input type="text" id="m_start_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'fin')"></td>
         <td><input type="text" id="m_work_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Sat</td>
-        <td><input type="text" id="m_date_5" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Sat</td><td><input type="text" id="m_date_5" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td>
         <td colspan="2"><input type="text" id="m_start_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'fin')"></td>
         <td><input type="text" id="m_work_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
         <td><input type="text" id="m_priv_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'priv')"></td>
       </tr>
       <tr>
-        <td class="b-left">Sun</td>
-        <td><input type="text" id="m_date_6" class="cell-in weekly" inputmode="numeric"></td>
+        <td class="b-left">Sun</td><td><input type="text" id="m_date_6" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td>
         <td colspan="2"><input type="text" id="m_start_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'fin')"></td>
         <td><input type="text" id="m_work_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
@@ -483,7 +424,7 @@
         <td><input type="text" id="m_tot_priv" class="cell-in bold weekly" inputmode="numeric"></td>
       </tr>
       <tr>
-        <td colspan="3" class="small-notice">PLEASE CIRCLE DAYS COVERED FOR ON CALL ALLOWANCE</td>
+        <td colspan="3" class="small-notice">CIRCLE DAYS FOR ON CALL</td>
         <td></td>
         <td class="b-center"><input type="checkbox" id="d_fri" class="day-toggle" onchange="updateAllTotals()"><label for="d_fri" class="day-label">FRI</label></td>
         <td></td>
@@ -493,53 +434,48 @@
         <td></td>
         <td class="b-center"><input type="checkbox" id="d_mon" class="day-toggle" onchange="updateAllTotals()"><label for="d_mon" class="day-label">MON</label></td>
       </tr>
-      <tr><td class="b-left">Date</td><td class="b-left">Site details</td><td class="b-center">Zone number</td><td class="b-center">R</td><td class="b-center">EFK</td><td class="b-center">F/U</td><td class="b-center">C/O</td><td class="b-center">T</td><td class="b-center">Start Time</td><td class="b-center">Finish Time</td><td class="b-center">Overtime</td></tr>
-
+      <tr><td class="b-left">Date</td><td class="b-left">Site details</td><td class="b-center">Zone</td><td class="b-center">R</td><td class="b-center">EFK</td><td class="b-center">F/U</td><td class="b-center">C/O</td><td class="b-center">T</td><td class="b-center">Start</td><td class="b-center">Finish</td><td class="b-center">OT</td></tr>
       <tbody id="log_body">
-        <tr><td><input type="text" class="cell-in weekly"></td><td colspan="7"><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <!-- 36 Standard Rows -->
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
-        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td colspan="7"><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <!-- 36 Rows -->
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this)"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly" inputmode="decimal"></td></tr>
       </tbody>
 
       <tr><td></td><td></td><td></td><td class="r-center">R</td><td class="r-center">EFK</td><td class="r-center">F/U</td><td class="r-center">C/O</td><td class="r-center">T</td><td></td><td></td><td class="r-center">Overtime</td></tr>
       <tr>
-        <td></td>
-        <td></td>
+        <td></td><td></td>
         <td class="r-left">TOTALS</td>
         <td><input type="text" id="tot_r" class="cell-in bold weekly" inputmode="numeric"></td>
         <td><input type="text" id="tot_efk" class="cell-in bold weekly" inputmode="numeric"></td>
@@ -555,12 +491,10 @@
 </div>
 
 <script>
-  // CHANGE YOUR 4-DIGIT PIN HERE:
   const HUB_PIN = "1234";
-
-  const STORAGE_KEY = 'nurture_ts_master_v3';
-  const SITES_KEY = 'nurture_saved_sites_v3';
   const AUTH_KEY = 'ml_hub_unlocked';
+  const SITES_KEY = 'nurture_saved_sites_v3';
+  const STORAGE_KEY = 'nurture_ts_master_v3';
 
   function verifyPin() {
     const val = document.getElementById('pin_box').value;
@@ -588,48 +522,117 @@
     }
   }
 
-  window.EMBEDDED_SITES = window.EMBEDDED_SITES || [
+  window.PERMANENT_SITES = [
     { name: "Aldershot Garrison", zone: "" },
+    { name: "Albemarle Barracks", zone: "" },
+    { name: "Azimghur Barracks", zone: "" },
+    { name: "Baker Barracks", zone: "" },
+    { name: "Bassingbourn Barracks", zone: "" },
+    { name: "Beachley Barracks", zone: "" },
+    { name: "Beacon Barracks", zone: "" },
     { name: "Bramley Training Area", zone: "" },
+    { name: "Brompton Barracks", zone: "" },
+    { name: "Buckley Barracks", zone: "" },
+    { name: "Catterick Garrison", zone: "" },
+    { name: "Carver Barracks", zone: "" },
+    { name: "Chetwynd Barracks", zone: "" },
+    { name: "Colchester Garrison", zone: "" },
+    { name: "Combermere Barracks", zone: "" },
+    { name: "Dale Barracks", zone: "" },
+    { name: "Dalton Barracks", zone: "" },
     { name: "Deepcut Barracks", zone: "" },
+    { name: "Imjin Barracks", zone: "" },
+    { name: "Imphal Barracks", zone: "" },
+    { name: "Invicta Park Barracks", zone: "" },
+    { name: "Kendrew Barracks", zone: "" },
+    { name: "Keogh Barracks", zone: "" },
+    { name: "Kiwi Barracks", zone: "" },
+    { name: "Longmoor Camp", zone: "" },
+    { name: "Lucknow Barracks", zone: "" },
+    { name: "Marne Barracks", zone: "" },
+    { name: "Merville Barracks", zone: "" },
     { name: "Minley Station", zone: "" },
+    { name: "MOD Lyneham", zone: "" },
+    { name: "MOD St Athan", zone: "" },
+    { name: "MOD Stafford", zone: "" },
+    { name: "MOD Worthy Down", zone: "" },
+    { name: "Normandy Barracks", zone: "" },
+    { name: "Prince William of Gloucester Barracks", zone: "" },
+    { name: "RMAS Sandhurst", zone: "" },
+    { name: "Shorncliffe Army Camp", zone: "" },
+    { name: "Sir John Moore Barracks", zone: "" },
+    { name: "St George's Barracks", zone: "" },
+    { name: "Swinton Barracks", zone: "" },
+    { name: "Tidworth Camp", zone: "" },
+    { name: "Victoria Barracks", zone: "" },
+    { name: "Weeton Barracks", zone: "" },
+    { name: "Woolwich Station", zone: "" },
+    { name: "RAF Barkston Heath", zone: "" },
+    { name: "RAF Benson", zone: "" },
+    { name: "RAF Boulmer", zone: "" },
+    { name: "RAF Brize Norton", zone: "" },
+    { name: "RAF Coningsby", zone: "" },
+    { name: "RAF Cosford", zone: "" },
+    { name: "RAF Cranwell", zone: "" },
+    { name: "RAF Croughton", zone: "" },
+    { name: "RAF Digby", zone: "" },
+    { name: "RAF Fairford", zone: "" },
+    { name: "RAF Feltwell", zone: "" },
+    { name: "RAF Fylingdales", zone: "" },
+    { name: "RAF Halton", zone: "" },
+    { name: "RAF Honington", zone: "" },
+    { name: "RAF Leeming", zone: "" },
+    { name: "RAF Lossiemouth", zone: "" },
+    { name: "RAF Marham", zone: "" },
+    { name: "RAF Northolt", zone: "" },
     { name: "RAF Odiham", zone: "" },
-    { name: "RMAS Sandhurst", zone: "" }
+    { name: "RAF Scampton", zone: "" },
+    { name: "RAF Shawbury", zone: "" },
+    { name: "RAF Valley", zone: "" },
+    { name: "RAF Waddington", zone: "" },
+    { name: "RAF Wyton", zone: "" }
   ];
+
+  function autoFormatDate(input) {
+    let v = input.value.replace(/\D/g, '');
+    if (v.length > 8) v = v.slice(0, 8);
+    if (v.length >= 5) {
+      input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+    } else if (v.length >= 3) {
+      input.value = `${v.slice(0,2)}/${v.slice(2)}`;
+    } else {
+      input.value = v;
+    }
+    saveState();
+  }
 
   function initGridBehaviours() {
     const rows = document.querySelectorAll('#log_body tr');
     rows.forEach((tr, rIdx) => {
       const inputs = tr.querySelectorAll('input');
-      if (rIdx === 0) {
-        inputs[0].id = 'r0_c0'; inputs[0].setAttribute('inputmode', 'numeric');
-        inputs[1].id = 'r0_c1'; inputs[1].setAttribute('list', 'site_suggestions');
-        inputs[2].id = 'r0_c8'; inputs[2].setAttribute('inputmode', 'numeric');
-        inputs[3].id = 'r0_c9'; inputs[3].setAttribute('inputmode', 'numeric');
-        inputs[4].id = 'r0_c10'; inputs[4].setAttribute('inputmode', 'decimal');
-        inputs[4].addEventListener('input', updateAllTotals);
-      } else {
-        inputs.forEach((inp, cIdx) => {
-          inp.id = `r${rIdx}_c${cIdx}`;
-          if (cIdx === 0 || cIdx === 2 || cIdx === 8 || cIdx === 9) {
-            inp.setAttribute('inputmode', 'numeric');
-          } else if (cIdx === 1) {
-            inp.setAttribute('list', 'site_suggestions');
-            inp.addEventListener('input', () => checkSiteZoneAutoFill(rIdx));
-          } else if (cIdx >= 3 && cIdx <= 7) {
-            inp.readOnly = true;
-            inp.classList.add('tick-cell');
-            inp.addEventListener('click', function() {
-              this.value = (this.value === '✓') ? '' : '✓';
-              updateAllTotals();
-              saveState();
-            });
-          } else if (cIdx === 10) {
-            inp.setAttribute('inputmode', 'decimal');
-            inp.addEventListener('input', updateAllTotals);
-          }
-        });
-      }
+      inputs.forEach((inp, cIdx) => {
+        inp.id = `r${rIdx}_c${cIdx}`;
+        if (cIdx === 0) {
+          inp.setAttribute('inputmode', 'numeric');
+          inp.setAttribute('placeholder', 'DD/MM');
+        } else if (cIdx === 1) {
+          inp.setAttribute('list', 'site_suggestions');
+          inp.addEventListener('input', () => checkSiteZoneAutoFill(rIdx));
+        } else if (cIdx === 2 || cIdx === 8 || cIdx === 9) {
+          inp.setAttribute('inputmode', 'numeric');
+        } else if (cIdx >= 3 && cIdx <= 7) {
+          inp.readOnly = true;
+          inp.classList.add('tick-cell');
+          inp.addEventListener('click', function() {
+            this.value = (this.value === '✓') ? '' : '✓';
+            updateAllTotals();
+            saveState();
+          });
+        } else if (cIdx === 10) {
+          inp.setAttribute('inputmode', 'decimal');
+          inp.addEventListener('input', updateAllTotals);
+        }
+      });
     });
   }
 
@@ -705,15 +708,18 @@
     let totalTasks = 0, totalOt = 0;
     cols.forEach(col => {
       let sum = 0, hasVal = false;
-      const startRow = (col.idx === 10) ? 0 : 1;
-      for (let r = startRow; r <= 36; r++) {
+      for (let r = 0; r < 36; r++) {
         const el = document.getElementById(`r${r}_c${col.idx}`);
         if (!el) continue;
         const raw = el.value.trim();
         if (raw !== '') {
           hasVal = true;
-          const num = parseFloat(raw);
-          sum += !isNaN(num) ? num : 1;
+          if (col.idx >= 3 && col.idx <= 7) {
+            if (raw === '✓' || raw !== '') sum += 1;
+          } else {
+            const num = parseFloat(raw);
+            sum += !isNaN(num) ? num : 0;
+          }
         }
       }
       const rounded = Math.round(sum * 100) / 100;
@@ -730,7 +736,7 @@
       if (!isNaN(p) && p > 0) { privMiles += p; }
     }
     let sitesLogged = 0;
-    for (let r = 0; r <= 36; r++) {
+    for (let r = 0; r < 36; r++) {
       const sEl = document.getElementById(`r${r}_c1`);
       if (sEl && sEl.value.trim() !== '') sitesLogged++;
     }
@@ -742,30 +748,36 @@
     const targetDays = Math.max(5, daysWithWork);
     const estWorkMiles = daysWithWork > 0 ? Math.round((workMiles / daysWithWork) * targetDays) : 0;
     const estOt = daysWithWork > 0 ? Math.round(((totalOt / daysWithWork) * targetDays) * 10) / 10 : 0;
+    
+    const hourlyRate = parseFloat(document.getElementById('ot_rate').value) || 0;
+    const estOtEarnings = Math.round(totalOt * hourlyRate * 100) / 100;
 
     document.getElementById('cnt_work').textContent = Math.round(workMiles * 10) / 10;
     document.getElementById('pred_work').textContent = `5-day est: ${estWorkMiles} mi`;
     document.getElementById('cnt_priv').textContent = Math.round(privMiles * 10) / 10;
     document.getElementById('pred_days').textContent = `${daysWithWork} day${daysWithWork === 1 ? '' : 's'} logged`;
     document.getElementById('cnt_ot').textContent = totalOt;
-    document.getElementById('pred_ot').textContent = `5-day est: ${estOt} hrs`;
+    document.getElementById('ot_earnings').textContent = `£${estOtEarnings.toFixed(2)} est`;
     document.getElementById('cnt_tasks').textContent = totalTasks;
     document.getElementById('pred_tasks').textContent = `${sitesLogged} site${sitesLogged === 1 ? '' : 's'} logged`;
     document.getElementById('cnt_oncall').textContent = onCallCount;
   }
 
   function getSites() {
+    let sites = [...window.PERMANENT_SITES];
     try {
       const stored = localStorage.getItem(SITES_KEY);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        const userSites = JSON.parse(stored);
+        userSites.forEach(us => {
+          if (!sites.some(s => s.name.toLowerCase() === us.name.toLowerCase())) {
+            sites.push(us);
+          }
+        });
+      }
     } catch (e) {}
-    return window.EMBEDDED_SITES || [];
-  }
-
-  function saveSites(sites) {
-    window.EMBEDDED_SITES = sites;
-    try { localStorage.setItem(SITES_KEY, JSON.stringify(sites)); } catch (e) {}
-    renderSites();
+    sites.sort((a, b) => a.name.localeCompare(b.name));
+    return sites;
   }
 
   function renderSites() {
@@ -774,14 +786,16 @@
     const tagList = document.getElementById('site_tags_list');
     datalist.innerHTML = '';
     tagList.innerHTML = '';
-    sites.forEach((s, idx) => {
+    sites.forEach((s) => {
       const opt = document.createElement('option');
       opt.value = s.name;
       datalist.appendChild(opt);
       const tag = document.createElement('span');
       tag.className = 'site-tag';
       const zoneText = s.zone ? ` (Zone ${s.zone})` : '';
-      tag.innerHTML = `${s.name}${zoneText} <button type="button" onclick="deleteSavedSite(${idx})">×</button>`;
+      const isCustom = !window.PERMANENT_SITES.some(ps => ps.name.toLowerCase() === s.name.toLowerCase());
+      const deleteBtn = isCustom ? ` <button type="button" onclick="deleteSavedSite('${s.name}')">×</button>` : '';
+      tag.innerHTML = `${s.name}${zoneText}${deleteBtn}`;
       tagList.appendChild(tag);
     });
   }
@@ -794,16 +808,20 @@
     if (!name) return;
     const sites = getSites().filter(s => s.name.toLowerCase() !== name.toLowerCase());
     sites.push({ name, zone });
-    sites.sort((a, b) => a.name.localeCompare(b.name));
-    saveSites(sites);
+    saveSitesToLocal(sites);
     nameEl.value = '';
     zoneEl.value = '';
   }
 
-  function deleteSavedSite(idx) {
-    const sites = getSites();
-    sites.splice(idx, 1);
-    saveSites(sites);
+  function saveSitesToLocal(sites) {
+    const customOnly = sites.filter(s => !window.PERMANENT_SITES.some(ps => ps.name.toLowerCase() === s.name.toLowerCase()));
+    try { localStorage.setItem(SITES_KEY, JSON.stringify(customOnly)); } catch (e) {}
+    renderSites();
+  }
+
+  function deleteSavedSite(siteName) {
+    let sites = getSites().filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
+    saveSitesToLocal(sites);
   }
 
   function checkSiteZoneAutoFill(rIdx) {
@@ -822,7 +840,7 @@
   function saveState() {
     try {
       const data = { inputs: {}, checks: {} };
-      document.querySelectorAll('input.cell-in').forEach(inp => {
+      document.querySelectorAll('input.cell-in, input.rate-input').forEach(inp => {
         if (inp.id && inp.value !== '') data.inputs[inp.id] = inp.value;
       });
       document.querySelectorAll('.day-toggle').forEach(chk => {
@@ -853,7 +871,7 @@
   }
 
   function clearWeeklyEntries() {
-    if (!confirm('Start a new week? Your Name, Vehicle Reg, Team Leader, and Saved Sites will stay saved.')) return;
+    if (!confirm('Start a new week? Your Name, Vehicle Reg, Team Leader, Hourly Rate and Saved Sites will stay saved.')) return;
     document.querySelectorAll('input.weekly').forEach(inp => inp.value = '');
     document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
     updateAllTotals();
