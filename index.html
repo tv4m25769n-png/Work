@@ -1,39 +1,765 @@
-meta name="robots" content="noindex, nofollow">
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Martin Law — Work Hub</title>
 <style>
-  #lock_screen {
-    position: fixed; inset: 0; background: #111827; z-index: 99999;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    color: #fff; font-family: sans-serif;
+  @page { size: A4 portrait; margin: 6mm 7mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0f172a;
+    margin: 0;
+    padding: 0;
+    color: #000;
+    overflow-x: auto;
   }
-  #lock_screen input {
-    font-size: 24px; letter-spacing: 8px; text-align: center; width: 140px;
-    padding: 8px; margin: 12px 0; border-radius: 6px; border: 1px solid #4b5563;
-    background: #1f2937; color: #fff;
+
+  /* 1. PIN LOCK SCREEN */
+  #pin_screen {
+    position: fixed;
+    inset: 0;
+    background: #0f172a;
+    z-index: 99999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #f8fafc;
+    padding: 20px;
   }
-  #lock_screen button {
-    background: #10b981; color: #fff; border: none; padding: 10px 20px;
-    font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer;
+  .pin-card {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 320px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  }
+  .pin-card h2 { margin: 0 0 6px 0; font-size: 18px; color: #38bdf8; }
+  .pin-card p { margin: 0 0 18px 0; font-size: 12px; color: #94a3b8; }
+  .pin-input {
+    width: 160px;
+    font-size: 26px;
+    letter-spacing: 10px;
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #475569;
+    background: #0f172a;
+    color: #fff;
+    outline: none;
+    margin-bottom: 14px;
+  }
+  .pin-btn {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    background: #10b981;
+    color: #fff;
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  #pin_err { color: #f87171; font-size: 12px; margin-top: 10px; min-height: 16px; }
+
+  /* 2. WORK HUB MENU */
+  #hub_view {
+    display: none;
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    color: #f8fafc;
+  }
+  .hub-header {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .hub-header h1 { margin: 0; font-size: 22px; color: #fff; }
+  .hub-header span { font-size: 12px; color: #38bdf8; }
+  .hub-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .hub-btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 10px;
+    padding: 18px 20px;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hub-btn:hover { background: #334155; }
+  .hub-btn-title { font-size: 16px; font-weight: bold; color: #34d399; margin-bottom: 4px; }
+  .hub-btn-desc { font-size: 12px; color: #94a3b8; }
+  .hub-arrow { font-size: 20px; color: #64748b; font-weight: bold; }
+  .hub-btn.disabled { opacity: 0.6; cursor: default; }
+
+  /* 3. TIMESHEET VIEW */
+  #timesheet_view {
+    display: none;
+    background: #e5e7eb;
+    min-height: 100vh;
+    padding: 8px;
+  }
+  .no-print {
+    width: 760px;
+    margin: 0 auto 10px auto;
+    background: #111827;
+    color: #f9fafb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+  .dash-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #374151;
+  }
+  .dash-title { font-size: 13px; font-weight: bold; color: #34d399; display: flex; align-items: center; gap: 8px; }
+  .btn-group { display: flex; flex-wrap: wrap; gap: 6px; }
+  .btn {
+    border: none;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: pointer;
+    color: #fff;
+  }
+  .btn-green { background: #10b981; }
+  .btn-blue { background: #3b82f6; }
+  .btn-purple { background: #6366f1; }
+  .btn-gray { background: #374151; border: 1px solid #4b5563; }
+
+  .counter-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    text-align: center;
+  }
+  .counter-card {
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 5px;
+    padding: 5px 4px;
+  }
+  .counter-label { font-size: 9.5px; color: #9ca3af; text-transform: uppercase; }
+  .counter-val { font-size: 14px; font-weight: bold; color: #fff; margin-top: 2px; }
+  .counter-sub { font-size: 9px; color: #fbbf24; margin-top: 1px; }
+
+  #site_drawer {
+    display: none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #374151;
+    font-size: 11px;
+  }
+  .site-add-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .site-add-row input {
+    background: #374151;
+    border: 1px solid #4b5563;
+    color: #fff;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+  }
+  .site-tags { display: flex; flex-wrap: wrap; gap: 5px; max-height: 90px; overflow-y: auto; }
+  .site-tag {
+    background: #374151;
+    padding: 3px 7px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+  }
+  .site-tag button { background: none; border: none; color: #f87171; font-weight: bold; cursor: pointer; padding: 0; font-size: 12px; }
+
+  /* A4 Sheet */
+  .sheet {
+    width: 760px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    border: 1.5px solid #000;
+  }
+  td {
+    border: 1px solid #000;
+    padding: 0 3px;
+    height: 17px;
+    font-size: 9.5px;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .title-cell { text-align: center; font-weight: bold; font-size: 11.5px; height: 19px; }
+  .box-label { vertical-align: top; text-align: center; font-size: 9.5px; padding-top: 2px; }
+  .b-left { font-weight: bold; text-align: left; padding-left: 3px; }
+  .b-center { font-weight: bold; text-align: center; }
+  .r-center { font-weight: normal; text-align: center; }
+  .r-left { font-weight: normal; text-align: left; padding-left: 3px; }
+  .small-notice { font-weight: bold; text-align: center; font-size: 8px; }
+
+  input.cell-in {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: Arial, sans-serif;
+    font-size: 9.5px;
+    color: #000;
+    text-align: center;
+    padding: 0 1px;
+    margin: 0;
+  }
+  input.cell-in.left { text-align: left; }
+  input.cell-in.bold { font-weight: bold; }
+  input.cell-in.header-box-input {
+    height: 34px;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+    display: block;
+    margin-top: 2px;
+  }
+  .day-toggle { display: none; }
+  .day-label {
+    display: inline-block;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 1px 4px;
+    border-radius: 50%;
+    border: 1.5px solid transparent;
+  }
+  .day-toggle:checked + .day-label { border-color: #000; }
+
+  @media print {
+    body { background: #fff; padding: 0; overflow: visible; }
+    #pin_screen, #hub_view, .no-print { display: none !important; }
+    #timesheet_view { display: block !important; background: #fff; padding: 0; }
+    .sheet { width: 100%; max-width: 100%; padding: 0; box-shadow: none; }
   }
 </style>
+</head>
+<body>
 
-<div id="lock_screen">
-  <h3>Enter PIN to Unlock</h3>
-  <input type="password" id="pin_input" maxlength="4" inputmode="numeric" placeholder="••••">
-  <button onclick="checkPin()">Unlock</button>
-  <div id="pin_err" style="color: #ef4444; font-size: 12px; margin-top: 8px;"></div>
+<div id="pin_screen">
+  <div class="pin-card">
+    <h2>work.martinlaw.me</h2>
+    <p>Enter your 4-digit PIN to access Work Hub</p>
+    <input type="password" id="pin_box" class="pin-input" maxlength="4" inputmode="numeric" placeholder="••••" oninput="if(this.value.length===4) verifyPin()">
+    <button class="pin-btn" onclick="verifyPin()">Unlock Hub</button>
+    <div id="pin_err"></div>
+  </div>
+</div>
+
+<div id="hub_view">
+  <div class="hub-header">
+    <h1>Martin Law — Work Hub</h1>
+    <span>work.martinlaw.me</span>
+  </div>
+  <div class="hub-grid">
+    <button class="hub-btn" onclick="openTool('timesheet')">
+      <div>
+        <div class="hub-btn-title">Weekly Mileage &amp; Timesheet</div>
+        <div class="hub-btn-desc">Nurture Pest Control A4 sheet with auto-totals &amp; PDF export</div>
+      </div>
+      <div class="hub-arrow">›</div>
+    </button>
+  </div>
+</div>
+
+<div id="timesheet_view">
+  <div class="no-print">
+    <div class="dash-top">
+      <div class="dash-title">
+        <button class="btn btn-gray" onclick="openHub()">← Back to Hub</button>
+        <span>Live Weekly Counter</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-purple" onclick="toggleSiteDrawer()">Manage Sites</button>
+        <button class="btn btn-gray" onclick="clearWeeklyEntries()">New Week</button>
+        <button class="btn btn-green" onclick="window.print()">Download / Save as PDF</button>
+      </div>
+    </div>
+    <div class="counter-grid">
+      <div class="counter-card"><div class="counter-label">Work Miles</div><div class="counter-val" id="cnt_work">0</div></div>
+      <div class="counter-card"><div class="counter-label">Private Miles</div><div class="counter-val" id="cnt_priv">0</div></div>
+      <div class="counter-card"><div class="counter-label">Overtime Hrs</div><div class="counter-val" id="cnt_ot">0</div></div>
+      <div class="counter-card"><div class="counter-label">Tasks</div><div class="counter-val" id="cnt_tasks">0</div></div>
+      <div class="counter-card"><div class="counter-label">On-Call</div><div class="counter-val" id="cnt_oncall">0</div></div>
+    </div>
+    <div id="site_drawer">
+      <div class="site-add-row">
+        <input type="text" id="new_site_name" placeholder="Site name" style="flex:2;">
+        <input type="text" id="new_site_zone" placeholder="Zone" inputmode="numeric" style="flex:1;">
+        <button class="btn btn-green" onclick="addSavedSite()">+ Add Site</button>
+      </div>
+      <div class="site-tags" id="site_tags_list"></div>
+    </div>
+  </div>
+
+  <datalist id="site_suggestions"></datalist>
+
+  <div class="sheet">
+    <table>
+      <colgroup>
+        <col style="width: 7.2%;"><col style="width: 19.3%;"><col style="width: 14.5%;"><col style="width: 5.8%;"><col style="width: 6.2%;"><col style="width: 5.8%;"><col style="width: 5.8%;"><col style="width: 6.4%;"><col style="width: 8.8%;"><col style="width: 9.7%;"><col style="width: 10.5%;">
+      </colgroup>
+      <tr><td colspan="11" class="title-cell">NURTURE PEST CONTROL TIME SHEET</td></tr>
+      <tr>
+        <td colspan="3" rowspan="3" class="box-label">Name<input type="text" id="f_name" class="cell-in header-box-input persist" value="Martin Law"></td>
+        <td colspan="2" class="b-left">VEHICLE REG:</td>
+        <td colspan="6"><input type="text" id="f_reg" class="cell-in left bold persist"></td>
+      </tr>
+      <tr><td></td><td class="b-center">Date</td><td colspan="2" class="b-center">Start Mileage</td><td colspan="2" class="b-center">Finish Mileage</td><td class="b-center">Work Miles</td><td class="b-center">Private Miles</td></tr>
+      <tr>
+        <td class="b-left">Mon</td><td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="2"><input type="text" id="m_start_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'fin')"></td>
+        <td><input type="text" id="m_work_0" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_priv_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'priv')"></td>
+      </tr>
+      <tr>
+        <td colspan="3" rowspan="3" class="box-label">Week commencing<input type="text" id="f_wc" class="cell-in header-box-input weekly" inputmode="numeric" oninput="autoFillWeekDates()"></td>
+        <td class="b-left">Tue</td><td><input type="text" id="m_date_1" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="2"><input type="text" id="m_start_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'fin')"></td>
+        <td><input type="text" id="m_work_1" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_priv_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Wed</td><td><input type="text" id="m_date_2" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="2"><input type="text" id="m_start_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'fin')"></td>
+        <td><input type="text" id="m_work_2" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_priv_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Thu</td><td><input type="text" id="m_date_3" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="2"><input type="text" id="m_start_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'fin')"></td>
+        <td><input type="text" id="m_work_3" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_priv_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'priv')"></td>
+      </tr>
+      <tr>
+        <td colspan="3" rowspan="3" class="box-label">Team Leader<input type="text" id="f_tl" class="cell-in header-box-input persist"></td>
+        <td class="b-left">Fri</td><td><input type="text" id="m_date_4" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="2"><input type="text" id="m_start_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'fin')"></td>
+        <td><input type="text" id="m_work_4" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_priv_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Sat</td><td><input type="text" id="m_date_5" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="2"><input type="text" id="m_start_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'fin')"></td>
+        <td><input type="text" id="m_work_5" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_priv_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'priv')"></td>
+      </tr>
+      <tr>
+        <td class="b-left">Sun</td><td><input type="text" id="m_date_6" class="cell-in weekly" inputmode="numeric"></td>
+        <td colspan="2"><input type="text" id="m_start_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'start')"></td>
+        <td colspan="2"><input type="text" id="m_fin_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'fin')"></td>
+        <td><input type="text" id="m_work_6" class="cell-in weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_priv_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'priv')"></td>
+      </tr>
+      <tr>
+        <td colspan="5"></td>
+        <td colspan="2" class="b-left">TOTALS</td>
+        <td colspan="2"><input type="text" id="m_tot_fin" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_tot_work" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="m_tot_priv" class="cell-in bold weekly" inputmode="numeric"></td>
+      </tr>
+      <tr>
+        <td colspan="3" class="small-notice">CIRCLE DAYS FOR ON CALL</td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_fri" class="day-toggle" onchange="updateAllTotals()"><label for="d_fri" class="day-label">FRI</label></td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_sat" class="day-toggle" onchange="updateAllTotals()"><label for="d_sat" class="day-label">SAT</label></td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_sun" class="day-toggle" onchange="updateAllTotals()"><label for="d_sun" class="day-label">SUN</label></td>
+        <td></td>
+        <td class="b-center"><input type="checkbox" id="d_mon" class="day-toggle" onchange="updateAllTotals()"><label for="d_mon" class="day-label">MON</label></td>
+      </tr>
+      <tr><td class="b-left">Date</td><td class="b-left">Site details</td><td class="b-center">Zone</td><td class="b-center">R</td><td class="b-center">EFK</td><td class="b-center">F/U</td><td class="b-center">C/O</td><td class="b-center">T</td><td class="b-center">Start</td><td class="b-center">Finish</td><td class="b-center">OT</td></tr>
+      <tbody id="log_body">
+        <tr><td><input type="text" class="cell-in weekly"></td><td colspan="7"><input type="text" class="cell-in left weekly" list="site_suggestions"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <!-- 36 Rows -->
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+        <tr><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in left weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td><td><input type="text" class="cell-in weekly"></td></tr>
+      </tbody>
+      <tr><td></td><td></td><td></td><td class="r-center">R</td><td class="r-center">EFK</td><td class="r-center">F/U</td><td class="r-center">C/O</td><td class="r-center">T</td><td></td><td></td><td class="r-center">OT</td></tr>
+      <tr>
+        <td></td><td></td><td class="r-left">TOTALS</td>
+        <td><input type="text" id="tot_r" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_efk" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_fu" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_co" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_t" class="cell-in bold weekly" inputmode="numeric"></td>
+        <td><input type="text" id="tot_st" class="cell-in weekly"></td>
+        <td><input type="text" id="tot_ft" class="cell-in weekly"></td>
+        <td><input type="text" id="tot_ot" class="cell-in bold weekly" inputmode="decimal"></td>
+      </tr>
+    </table>
+  </div>
 </div>
 
 <script>
-  const MY_PIN = "1234"; // Set your 4-digit PIN here
-  function checkPin() {
-    if (document.getElementById('pin_input').value === MY_PIN) {
-      document.getElementById('lock_screen').style.display = 'none';
-      sessionStorage.setItem('unlocked', 'true');
+  const HUB_PIN = "1234";
+  const STORAGE_KEY = 'nurture_ts_master_v3';
+  const SITES_KEY = 'nurture_saved_sites_v3';
+  const AUTH_KEY = 'ml_hub_unlocked';
+
+  function verifyPin() {
+    const val = document.getElementById('pin_box').value;
+    if (val === HUB_PIN) {
+      localStorage.setItem(AUTH_KEY, '1');
+      openHub();
     } else {
-      document.getElementById('pin_err').textContent = "Incorrect PIN";
+      document.getElementById('pin_err').textContent = 'Incorrect PIN';
+      document.getElementById('pin_box').value = '';
     }
   }
-  if (sessionStorage.getItem('unlocked') === 'true') {
-    document.getElementById('lock_screen').style.display = 'none';
+
+  function openHub() {
+    document.getElementById('pin_screen').style.display = 'none';
+    document.getElementById('timesheet_view').style.display = 'none';
+    document.getElementById('hub_view').style.display = 'block';
+    document.body.style.background = '#0f172a';
   }
+
+  function openTool(tool) {
+    if (tool === 'timesheet') {
+      document.getElementById('hub_view').style.display = 'none';
+      document.getElementById('timesheet_view').style.display = 'block';
+      document.body.style.background = '#e5e7eb';
+    }
+  }
+
+  window.EMBEDDED_SITES = [
+    { name: "Aldershot Garrison", zone: "" },
+    { name: "Bramley Training Area", zone: "" },
+    { name: "Deepcut Barracks", zone: "" },
+    { name: "Minley Station", zone: "" },
+    { name: "RAF Odiham", zone: "" },
+    { name: "RMAS Sandhurst", zone: "" }
+  ];
+
+  function initGridBehaviours() {
+    const rows = document.querySelectorAll('#log_body tr');
+    rows.forEach((tr, rIdx) => {
+      const inputs = tr.querySelectorAll('input');
+      if (rIdx === 0) {
+        inputs[0].id = 'r0_c0'; inputs[0].setAttribute('inputmode', 'numeric');
+        inputs[1].id = 'r0_c1'; inputs[1].setAttribute('list', 'site_suggestions');
+        inputs[2].id = 'r0_c8'; inputs[2].setAttribute('inputmode', 'numeric');
+        inputs[3].id = 'r0_c9'; inputs[3].setAttribute('inputmode', 'numeric');
+        inputs[4].id = 'r0_c10'; inputs[4].setAttribute('inputmode', 'decimal');
+        inputs[4].addEventListener('input', updateAllTotals);
+      } else {
+        inputs.forEach((inp, cIdx) => {
+          inp.id = `r${rIdx}_c${cIdx}`;
+          if (cIdx === 0 || cIdx === 2 || cIdx === 8 || cIdx === 9) {
+            inp.setAttribute('inputmode', 'numeric');
+          } else if (cIdx === 1) {
+            inp.setAttribute('list', 'site_suggestions');
+            inp.addEventListener('input', () => checkSiteZoneAutoFill(rIdx));
+          } else if (cIdx >= 3 && cIdx <= 7) {
+            inp.readOnly = true;
+            inp.classList.add('tick-cell');
+            inp.addEventListener('click', function() {
+              this.value = (this.value === '✓') ? '' : '✓';
+              updateAllTotals();
+              saveState();
+            });
+          } else if (cIdx === 10) {
+            inp.setAttribute('inputmode', 'decimal');
+            inp.addEventListener('input', updateAllTotals);
+          }
+        });
+      }
+    });
+  }
+
+  function autoFillWeekDates() {
+    const raw = document.getElementById('f_wc').value.trim();
+    const match = raw.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2}|\d{4})$/);
+    if (!match) { saveState(); return; }
+    let day = parseInt(match[1], 10);
+    let month = parseInt(match[2], 10) - 1;
+    let year = parseInt(match[3], 10);
+    if (year < 100) year += 2000;
+    const baseDate = new Date(year, month, day);
+    if (isNaN(baseDate.getTime())) return;
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(baseDate);
+      d.setDate(baseDate.getDate() + i);
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      document.getElementById(`m_date_${i}`).value = `${dd}/${mm}`;
+    }
+    saveState();
+  }
+
+  function recalcMileage(dayIdx, sourceField) {
+    for (let i = dayIdx; i < 7; i++) {
+      const sEl = document.getElementById(`m_start_${i}`);
+      const fEl = document.getElementById(`m_fin_${i}`);
+      const pEl = document.getElementById(`m_priv_${i}`);
+      const wEl = document.getElementById(`m_work_${i}`);
+      const s = parseFloat(sEl.value);
+      const f = parseFloat(fEl.value);
+      const p = parseFloat(pEl.value) || 0;
+      if (!isNaN(s) && !isNaN(f) && f >= s) {
+        wEl.value = Math.round((f - s) * 10) / 10;
+      } else if (isNaN(f)) {
+        wEl.value = '';
+      }
+      if (i < 6 && !isNaN(f)) {
+        const nextStartEl = document.getElementById(`m_start_${i + 1}`);
+        if (i === dayIdx && (sourceField === 'fin' || sourceField === 'priv')) {
+          nextStartEl.value = Math.round((f + p) * 10) / 10;
+        } else if (nextStartEl.value === '') {
+          nextStartEl.value = Math.round((f + p) * 10) / 10;
+        }
+      }
+    }
+    recalcMileageTotals();
+  }
+
+  function recalcMileageTotals() {
+    let workSum = 0, privSum = 0, hasWork = false, hasPriv = false;
+    for (let i = 0; i < 7; i++) {
+      const w = parseFloat(document.getElementById(`m_work_${i}`).value);
+      const p = parseFloat(document.getElementById(`m_priv_${i}`).value);
+      if (!isNaN(w)) { workSum += w; hasWork = true; }
+      if (!isNaN(p)) { privSum += p; hasPriv = true; }
+    }
+    document.getElementById('m_tot_work').value = hasWork ? Math.round(workSum * 10) / 10 : '';
+    document.getElementById('m_tot_priv').value = hasPriv ? Math.round(privSum * 10) / 10 : '';
+    updateAllTotals();
+    saveState();
+  }
+
+  function updateAllTotals() {
+    const cols = [
+      { idx: 3, id: 'tot_r' }, { idx: 4, id: 'tot_efk' }, { idx: 5, id: 'tot_fu' },
+      { idx: 6, id: 'tot_co' }, { idx: 7, id: 'tot_t' }, { idx: 10, id: 'tot_ot' }
+    ];
+    let totalTasks = 0, totalOt = 0;
+    cols.forEach(col => {
+      let sum = 0, hasVal = false;
+      const startRow = (col.idx === 10) ? 0 : 1;
+      for (let r = startRow; r <= 36; r++) {
+        const el = document.getElementById(`r${r}_c${col.idx}`);
+        if (!el) continue;
+        const raw = el.value.trim();
+        if (raw !== '') {
+          hasVal = true;
+          const num = parseFloat(raw);
+          sum += !isNaN(num) ? num : 1;
+        }
+      }
+      const rounded = Math.round(sum * 100) / 100;
+      document.getElementById(col.id).value = hasVal ? rounded : '';
+      if (col.idx === 10) totalOt = rounded;
+      else totalTasks += rounded;
+    });
+
+    let daysWithWork = 0, workMiles = 0, privMiles = 0;
+    for (let i = 0; i < 7; i++) {
+      const w = parseFloat(document.getElementById(`m_work_${i}`).value);
+      const p = parseFloat(document.getElementById(`m_priv_${i}`).value);
+      if (!isNaN(w) && w > 0) { workMiles += w; daysWithWork++; }
+      if (!isNaN(p) && p > 0) { privMiles += p; }
+    }
+    let sitesLogged = 0;
+    for (let r = 0; r <= 36; r++) {
+      const sEl = document.getElementById(`r${r}_c1`);
+      if (sEl && sEl.value.trim() !== '') sitesLogged++;
+    }
+    let onCallCount = 0;
+    ['d_fri', 'd_sat', 'd_sun', 'd_mon'].forEach(id => {
+      if (document.getElementById(id).checked) onCallCount++;
+    });
+
+    document.getElementById('cnt_work').textContent = Math.round(workMiles * 10) / 10;
+    document.getElementById('cnt_priv').textContent = Math.round(privMiles * 10) / 10;
+    document.getElementById('cnt_ot').textContent = totalOt;
+    document.getElementById('cnt_tasks').textContent = totalTasks;
+    document.getElementById('cnt_oncall').textContent = onCallCount;
+  }
+
+  function getSites() {
+    try {
+      const stored = localStorage.getItem(SITES_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch (e) {}
+    return window.EMBEDDED_SITES || [];
+  }
+
+  function saveSites(sites) {
+    window.EMBEDDED_SITES = sites;
+    try { localStorage.setItem(SITES_KEY, JSON.stringify(sites)); } catch (e) {}
+    renderSites();
+  }
+
+  function renderSites() {
+    const sites = getSites();
+    const datalist = document.getElementById('site_suggestions');
+    const tagList = document.getElementById('site_tags_list');
+    datalist.innerHTML = '';
+    tagList.innerHTML = '';
+    sites.forEach((s, idx) => {
+      const opt = document.createElement('option');
+      opt.value = s.name;
+      datalist.appendChild(opt);
+      const tag = document.createElement('span');
+      tag.className = 'site-tag';
+      tag.innerHTML = `${s.name} <button type="button" onclick="deleteSavedSite(${idx})">×</button>`;
+      tagList.appendChild(tag);
+    });
+  }
+
+  function addSavedSite() {
+    const nameEl = document.getElementById('new_site_name');
+    const zoneEl = document.getElementById('new_site_zone');
+    const name = nameEl.value.trim();
+    const zone = zoneEl.value.trim();
+    if (!name) return;
+    const sites = getSites().filter(s => s.name.toLowerCase() !== name.toLowerCase());
+    sites.push({ name, zone });
+    sites.sort((a, b) => a.name.localeCompare(b.name));
+    saveSites(sites);
+    nameEl.value = '';
+    zoneEl.value = '';
+  }
+
+  function deleteSavedSite(idx) {
+    const sites = getSites();
+    sites.splice(idx, 1);
+    saveSites(sites);
+  }
+
+  function checkSiteZoneAutoFill(rIdx) {
+    const siteVal = document.getElementById(`r${rIdx}_c1`).value.trim().toLowerCase();
+    const zoneEl = document.getElementById(`r${rIdx}_c2`);
+    if (!siteVal || !zoneEl || zoneEl.value.trim() !== '') return;
+    const match = getSites().find(s => s.name.toLowerCase() === siteVal);
+    if (match && match.zone) zoneEl.value = match.zone;
+  }
+
+  function toggleSiteDrawer() {
+    const d = document.getElementById('site_drawer');
+    d.style.display = (d.style.display === 'block') ? 'none' : 'block';
+  }
+
+  function saveState() {
+    try {
+      const data = { inputs: {}, checks: {} };
+      document.querySelectorAll('input.cell-in').forEach(inp => {
+        if (inp.id && inp.value !== '') data.inputs[inp.id] = inp.value;
+      });
+      document.querySelectorAll('.day-toggle').forEach(chk => {
+        data.checks[chk.id] = chk.checked;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch (e) {}
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const data = JSON.parse(raw);
+      if (data.inputs) {
+        Object.keys(data.inputs).forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.value = data.inputs[id];
+        });
+      }
+      if (data.checks) {
+        Object.keys(data.checks).forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.checked = !!data.checks[id];
+        });
+      }
+    } catch (e) {}
+  }
+
+  function clearWeeklyEntries() {
+    if (!confirm('Start a new week?')) return;
+    document.querySelectorAll('input.weekly').forEach(inp => inp.value = '');
+    document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
+    updateAllTotals();
+    saveState();
+  }
+
+  document.addEventListener('input', () => { updateAllTotals(); saveState(); });
+  window.addEventListener('DOMContentLoaded', () => {
+    initGridBehaviours();
+    renderSites();
+    loadState();
+    updateAllTotals();
+    if (localStorage.getItem(AUTH_KEY) === '1') openHub();
+  });
 </script>
+</body>
+</html>
