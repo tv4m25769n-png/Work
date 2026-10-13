@@ -72,6 +72,7 @@
   input.cell-in { width: 100%; height: 100%; border: none; outline: none; background: transparent; font-family: Arial, sans-serif; font-size: 9.5px; color: #000; text-align: center; padding: 0 1px; margin: 0; }
   input.cell-in.left { text-align: left; }
   input.cell-in.bold { font-weight: bold; }
+  input.cell-in.bad { color: #dc2626; }
   input.cell-in.header-box-input { height: 31px; font-size: 11px; font-weight: bold; text-align: center; display: block; margin-top: 2px; }
   input.tick-cell { cursor: pointer; font-weight: bold; font-size: 11px; user-select: none; }
   .day-toggle { display: none; }
@@ -186,7 +187,7 @@
         <td class="b-left">Mon</td><td><input type="text" id="m_date_0" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()" placeholder="DD/MM"></td>
         <td colspan="2"><input type="text" id="m_start_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'fin')"></td>
-        <td><input type="text" id="m_work_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_work_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'work')"></td>
         <td><input type="text" id="m_priv_0" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(0, 'priv')"></td>
       </tr>
       <tr>
@@ -194,21 +195,21 @@
         <td class="b-left">Tue</td><td><input type="text" id="m_date_1" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
         <td colspan="2"><input type="text" id="m_start_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'fin')"></td>
-        <td><input type="text" id="m_work_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_work_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'work')"></td>
         <td><input type="text" id="m_priv_1" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(1, 'priv')"></td>
       </tr>
       <tr>
         <td class="b-left">Wed</td><td><input type="text" id="m_date_2" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
         <td colspan="2"><input type="text" id="m_start_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'fin')"></td>
-        <td><input type="text" id="m_work_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_work_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'work')"></td>
         <td><input type="text" id="m_priv_2" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(2, 'priv')"></td>
       </tr>
       <tr>
         <td class="b-left">Thu</td><td><input type="text" id="m_date_3" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
         <td colspan="2"><input type="text" id="m_start_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'fin')"></td>
-        <td><input type="text" id="m_work_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_work_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'work')"></td>
         <td><input type="text" id="m_priv_3" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(3, 'priv')"></td>
       </tr>
       <tr>
@@ -216,21 +217,21 @@
         <td class="b-left">Fri</td><td><input type="text" id="m_date_4" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
         <td colspan="2"><input type="text" id="m_start_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'fin')"></td>
-        <td><input type="text" id="m_work_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_work_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'work')"></td>
         <td><input type="text" id="m_priv_4" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(4, 'priv')"></td>
       </tr>
       <tr>
         <td class="b-left">Sat</td><td><input type="text" id="m_date_5" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
         <td colspan="2"><input type="text" id="m_start_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'fin')"></td>
-        <td><input type="text" id="m_work_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_work_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'work')"></td>
         <td><input type="text" id="m_priv_5" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(5, 'priv')"></td>
       </tr>
       <tr>
         <td class="b-left">Sun</td><td><input type="text" id="m_date_6" class="cell-in weekly" inputmode="numeric" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
         <td colspan="2"><input type="text" id="m_start_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'start')"></td>
         <td colspan="2"><input type="text" id="m_fin_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'fin')"></td>
-        <td><input type="text" id="m_work_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileageTotals()"></td>
+        <td><input type="text" id="m_work_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'work')"></td>
         <td><input type="text" id="m_priv_6" class="cell-in weekly" inputmode="numeric" oninput="recalcMileage(6, 'priv')"></td>
       </tr>
       <tr>
@@ -283,10 +284,13 @@
   // Contract rules (clause 7)
   const TRAVEL_BUFFER_START = 8 * 60;       // 08:00 (08:30 contracted start less 30 min unpaid commute)
   const TRAVEL_BUFFER_END = 17 * 60 + 30;   // 17:30 (17:00 contracted finish plus 30 min unpaid commute)
-  const COMMUTE_MINS = 30;
+  const COMMUTE_MINS = 30;                  // unpaid commute at each end of every shift
   const BREAK_THRESHOLD_MINS = 360;         // unpaid break applies on a day with more than 6 hours (set to 0 to take it off every day)
   const BREAK_MINS = 30;
   const CONTRACT_HRS = 40;
+  const OT_ROUND_MINS = 15;                 // overtime rounded to the nearest 15 min (set to 0 for exact minutes)
+  const PRIVATE_ADDED_TO_NEXT_START = true; // next day's start = last finish + that day's private miles (false = last finish only)
+  const CARRY_KEY = 'ml_carry_odo';         // last week's closing mileage, used for Monday's start
 
   const DEFAULT_SITE_NAMES = [
     "Buckingham Palace","St James's Palace","Clarence House","Kensington Palace","Windsor Castle","Frogmore House","Hampton Court Palace","Tower of London","Horse Guards","MOD Main Building Whitehall","Old War Office Whitehall","Wellington Barracks","Hyde Park Barracks","Regent's Park Barracks","Chelsea Barracks","Royal Hospital Chelsea","Victoria Barracks Windsor","Combermere Barracks Windsor","Royal Artillery Barracks Woolwich","Woolwich Garrison","Napier Lines Woolwich","Cavalry Barracks Hounslow","Armoury House (HAC)","King's Troop RHA Woolwich","Latchmere House","Kneller Hall Twickenham","Northwood Headquarters",
@@ -368,7 +372,8 @@
         timestamp: Date.now(),
         storage: localStorage.getItem(STORAGE_KEY),
         sites: localStorage.getItem(SITES_KEY),
-        pin: localStorage.getItem('ml_hub_pin')
+        pin: localStorage.getItem('ml_hub_pin'),
+        carry: localStorage.getItem(CARRY_KEY)
       };
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -397,6 +402,7 @@
         const parsed = JSON.parse(e.target.result);
         if (parsed.storage) localStorage.setItem(STORAGE_KEY, parsed.storage);
         if (parsed.sites) localStorage.setItem(SITES_KEY, parsed.sites);
+        if (parsed.carry) localStorage.setItem(CARRY_KEY, parsed.carry);
         if (parsed.pin) {
           localStorage.setItem('ml_hub_pin', parsed.pin);
           HUB_PIN = parsed.pin.trim();
@@ -418,7 +424,7 @@
     let html = '';
     for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
       html += `<tr>
-        <td><input type="text" id="r${r}_c0" class="cell-in weekly" inputmode="numeric" placeholder="DD/MM" oninput="autoFormatDate(this); calcRowOvertime(${r})"></td>
+        <td><input type="text" id="r${r}_c0" class="cell-in weekly" inputmode="numeric" placeholder="DD/MM" oninput="autoFormatDate(this); recalcAllOvertime()"></td>
         <td><input type="text" id="r${r}_c1" class="cell-in left weekly site-input" autocomplete="off"></td>
         <td><input type="text" id="r${r}_c2" class="cell-in weekly" inputmode="numeric"></td>
         <td><input type="text" id="r${r}_c3" class="cell-in weekly tick-cell" readonly></td>
@@ -528,6 +534,7 @@
       }
     }
 
+    if (OT_ROUND_MINS > 0) otMins = Math.round(otMins / OT_ROUND_MINS) * OT_ROUND_MINS;
     const otHours = Math.round((otMins / 60) * 100) / 100;
     otEl.value = otHours > 0 ? otHours : '';
     if (!quiet) { updateAllTotals(); saveState(); }
@@ -619,34 +626,107 @@
     recalcAllOvertime();
   }
 
-  function recalcMileage(dayIdx, sourceField) {
-    for (let i = dayIdx; i < 7; i++) {
-      const s = parseFloat(document.getElementById(`m_start_${i}`).value);
-      const f = parseFloat(document.getElementById(`m_fin_${i}`).value);
-      const p = parseFloat(document.getElementById(`m_priv_${i}`).value) || 0;
-      const wEl = document.getElementById(`m_work_${i}`);
-      if (!isNaN(s) && !isNaN(f) && f >= s) wEl.value = Math.round((f - s) * 10) / 10;
-      else if (isNaN(f)) wEl.value = '';
-      if (i < 6 && !isNaN(f)) {
-        const nextStartEl = document.getElementById(`m_start_${i + 1}`);
-        if ((i === dayIdx && (sourceField === 'fin' || sourceField === 'priv')) || nextStartEl.value === '') {
-          nextStartEl.value = Math.round((f + p) * 10) / 10;
+  // ---------- Smart mileage ----------
+  // Every day follows:  Finish = Start + Work + Private.
+  //  - Type any two of Finish / Work / Private and the third is worked out.
+  //  - Start fills itself from the last finish above it (plus that day's private miles, see PRIVATE_ADDED_TO_NEXT_START).
+  //  - Boxes the app fills in ("auto") are recalculated whenever something changes. Boxes you typed are only
+  //    replaced if your two newest entries for that day contradict them.
+  let editSeq = 0;
+  const mEl = (i, f) => document.getElementById(`m_${f}_${i}`);
+  const mNum = el => { const v = parseFloat(el.value); return isNaN(v) ? NaN : v; };
+  const isTyped = el => el.value.trim() !== '' && el.dataset.auto !== '1';
+  const tOf = el => parseInt(el.dataset.t || '0', 10);
+  const r1 = v => Math.round(v * 10) / 10;
+
+  function setMile(el, v) {   // auto-fill a box (NaN clears it)
+    if (isNaN(v)) { el.value = ''; el.dataset.auto = ''; el.dataset.t = '0'; el.classList.remove('bad'); return; }
+    el.value = r1(v);
+    el.dataset.auto = '1';
+    el.dataset.t = '0';
+    el.classList.toggle('bad', v < 0 && (el.id.indexOf('_work_') > -1 || el.id.indexOf('_priv_') > -1));
+  }
+
+  function solveDay(i, changed) {
+    const S = mEl(i, 'start'), F = mEl(i, 'fin'), W = mEl(i, 'work'), P = mEl(i, 'priv');
+
+    // 1. Start of day comes from the last finish above it (or last week's closing mileage on Monday)
+    const inUse = [F, W, P].some(isTyped);
+    if (S.value.trim() === '' || S.dataset.auto === '1') {
+      let base = NaN;
+      if (inUse) {
+        for (let j = i - 1; j >= 0 && isNaN(base); j--) {
+          const pf = mNum(mEl(j, 'fin'));
+          if (!isNaN(pf)) base = pf + (PRIVATE_ADDED_TO_NEXT_START ? (mNum(mEl(j, 'priv')) || 0) : 0);
+        }
+        if (isNaN(base) && i === 0) {
+          try { base = parseFloat(localStorage.getItem(CARRY_KEY)); } catch (e) {}
         }
       }
+      if (!isNaN(base)) setMile(S, base);
+      else if (S.dataset.auto === '1') setMile(S, NaN);
     }
+
+    // 2. Work out whichever of Finish / Work / Private is missing
+    const s = mNum(S);
+    const typed = [F, W, P].filter(isTyped);
+    let target = null;
+
+    if (typed.length === 3) {
+      if (isNaN(s)) { setMile(S, mNum(F) - mNum(W) - mNum(P)); return; }
+      const off = Math.abs(s + mNum(W) + mNum(P) - mNum(F)) > 0.05;
+      if (off && changed) {
+        const others = typed.filter(e => e.id !== `m_${changed}_${i}`);
+        target = others.sort((a, b) => tOf(a) - tOf(b))[0];   // the oldest entry gives way
+      }
+    } else if (typed.length === 2) {
+      target = [F, W, P].find(e => !isTyped(e));
+    } else if (typed.length === 1) {
+      if (typed[0] === W) target = F;
+      else if (typed[0] === F) target = W;
+      else if (!isNaN(mNum(W))) target = F;
+    }
+
+    if (target && !isNaN(s)) {
+      const w = mNum(W) || 0, p = mNum(P) || 0, f = mNum(F);
+      if (target === F) setMile(F, s + w + p);
+      else if (target === W) setMile(W, f - s - p);
+      else setMile(P, f - s - w);
+    }
+  }
+
+  function solveAllMileage() {
+    for (let i = 0; i < 7; i++) solveDay(i, null);
+    recalcMileageTotals();
+  }
+
+  function recalcMileage(dayIdx, sourceField) {
+    const el = mEl(dayIdx, sourceField);
+    if (el) {
+      el.classList.remove('bad');
+      el.dataset.auto = '';
+      if (el.value.trim() === '') {
+        el.dataset.t = '0';
+        if (sourceField !== 'start') {
+          ['fin', 'work', 'priv'].forEach(f => { const o = mEl(dayIdx, f); if (o.dataset.auto === '1') setMile(o, NaN); });
+        }
+      } else {
+        el.dataset.t = String(++editSeq);
+      }
+    }
+    for (let i = dayIdx; i < 7; i++) solveDay(i, i === dayIdx ? sourceField : null);
     recalcMileageTotals();
   }
 
   function recalcMileageTotals() {
     let workSum = 0, privSum = 0, hasWork = false, hasPriv = false;
     for (let i = 0; i < 7; i++) {
-      const w = parseFloat(document.getElementById(`m_work_${i}`).value);
-      const p = parseFloat(document.getElementById(`m_priv_${i}`).value);
-      if (!isNaN(w)) { workSum += w; hasWork = true; }
-      if (!isNaN(p)) { privSum += p; hasPriv = true; }
+      const w = mNum(mEl(i, 'work')), p = mNum(mEl(i, 'priv'));
+      if (!isNaN(w) && w >= 0) { workSum += w; hasWork = true; }
+      if (!isNaN(p) && p >= 0) { privSum += p; hasPriv = true; }
     }
-    document.getElementById('m_tot_work').value = hasWork ? Math.round(workSum * 10) / 10 : '';
-    document.getElementById('m_tot_priv').value = hasPriv ? Math.round(privSum * 10) / 10 : '';
+    document.getElementById('m_tot_work').value = hasWork ? r1(workSum) : '';
+    document.getElementById('m_tot_priv').value = hasPriv ? r1(privSum) : '';
     updateAllTotals();
     saveState();
   }
@@ -795,13 +875,25 @@
 
   function saveState() {
     try {
-      const data = { inputs: {}, checks: {} };
+      const data = { inputs: {}, checks: {}, auto: [], seq: {} };
       document.querySelectorAll('input.cell-in, input.rate-input, select.rate-select').forEach(inp => {
-        if (inp.id && inp.value !== '') data.inputs[inp.id] = inp.value;
+        if (inp.id && inp.value !== '') {
+          data.inputs[inp.id] = inp.value;
+          if (inp.dataset.auto === '1') data.auto.push(inp.id);
+          const t = parseInt(inp.dataset.t || '0', 10);
+          if (t > 0) data.seq[inp.id] = t;
+        }
       });
       document.querySelectorAll('.day-toggle').forEach(chk => { data.checks[chk.id] = chk.checked; });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (e) {}
+  }
+
+  function resetWeekly() {
+    document.querySelectorAll('input.weekly').forEach(inp => {
+      inp.value = ''; inp.dataset.auto = ''; inp.dataset.t = '0'; inp.classList.remove('bad');
+    });
+    document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
   }
 
   function loadState() {
@@ -809,18 +901,29 @@
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const data = JSON.parse(raw);
-      document.querySelectorAll('input.weekly').forEach(inp => inp.value = '');
-      document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
+      resetWeekly();
       if (data.inputs) Object.keys(data.inputs).forEach(id => { const el = document.getElementById(id); if (el) el.value = data.inputs[id]; });
       if (data.checks) Object.keys(data.checks).forEach(id => { const el = document.getElementById(id); if (el) el.checked = !!data.checks[id]; });
+      (data.auto || []).forEach(id => { const el = document.getElementById(id); if (el) el.dataset.auto = '1'; });
+      Object.keys(data.seq || {}).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.dataset.t = String(data.seq[id]); editSeq = Math.max(editSeq, data.seq[id]); }
+      });
+      solveAllMileage();
       updateAllTotals();
     } catch (e) {}
   }
 
   function clearWeeklyEntries() {
     if (!confirm('Start a new week? Your Name, Vehicle Reg, Team Leader, Hourly Rate, Multiplier and Saved Sites will stay saved.')) return;
-    document.querySelectorAll('input.weekly').forEach(inp => inp.value = '');
-    document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
+    // remember where the car finished, so next Monday's start fills itself
+    let lastBase = NaN;
+    for (let j = 6; j >= 0 && isNaN(lastBase); j--) {
+      const f = mNum(mEl(j, 'fin'));
+      if (!isNaN(f)) lastBase = f + (PRIVATE_ADDED_TO_NEXT_START ? (mNum(mEl(j, 'priv')) || 0) : 0);
+    }
+    if (!isNaN(lastBase)) { try { localStorage.setItem(CARRY_KEY, String(r1(lastBase))); } catch (e) {} }
+    resetWeekly();
     updateAllTotals();
     saveState();
   }
