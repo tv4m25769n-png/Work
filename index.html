@@ -1,3 +1,9 @@
+The updated index.html code below includes the Way A Smart Mileage Engine and Live URL Hash (#) Syncing built directly in.
+What’s New & How It Works:
+ * Live URL State (# Hash): Every time you type on the sheet, the web address bar silently updates (work.martinlaw.me/#...) with an encoded snapshot of your current week. If you open a bookmark, refresh, or tap Copy Sync Link to send the URL to your tablet or Notes, opening that link immediately restores the entire sheet and saves it to that browser's local storage.
+ * Immediate Next-Day Carry-Over: As soon as you enter Monday's Finish Mileage (8250), Tuesday's Start Mileage immediately displays 8250 (and cascades down any subsequent days).
+ * Private Trip on the Way Home: Enter Start (8200) and Finish (8270) to get 70 Work Miles. Type 20 into Private Miles, and Work Miles immediately recalculates to 50 while Finish stays 8270. Delete the 20, and Work Miles snaps straight back to 70.
+ * Evening Trip After Logging Work (Way A — Morning Odometer Check): If Monday finished at 8250 (Work 50) and Tuesday morning your odometer reads 8270, simply overwrite Tuesday's Start Mileage with 8270. The sheet spots the 20-mile overnight difference, locks Monday's Work Miles at 50, adds 20 to Monday's Private Miles, and updates Monday's Finish Mileage to 8270.
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
@@ -128,6 +134,7 @@
         <span>Live Weekly Counter</span>
       </div>
       <div class="btn-group">
+        <button type="button" class="btn btn-blue" id="copy_link_btn" onclick="copySyncLink()">Copy Sync Link</button>
         <button type="button" class="btn btn-blue" onclick="exportSaveFile()">Export Save</button>
         <button type="button" class="btn btn-blue" onclick="importSaveFilePrompt()">Import Save</button>
         <button type="button" class="btn btn-purple" onclick="toggleSiteDrawer()">Manage Sites</button>
@@ -279,18 +286,15 @@
   const AUTH_KEY = 'ml_hub_unlocked';
   const SITES_KEY = 'nurture_saved_sites_v3';
   const STORAGE_KEY = 'nurture_ts_master_v3';
+  const CARRY_KEY = 'ml_carry_odo';
   const TOTAL_LOG_ROWS = 34;
 
   // Contract rules (clause 7)
   const TRAVEL_BUFFER_START = 8 * 60;       // 08:00 (08:30 contracted start less 30 min unpaid commute)
   const TRAVEL_BUFFER_END = 17 * 60 + 30;   // 17:30 (17:00 contracted finish plus 30 min unpaid commute)
-  const COMMUTE_MINS = 30;                  // unpaid commute at each end of every shift
-  const BREAK_THRESHOLD_MINS = 360;         // unpaid break applies on a day with more than 6 hours (set to 0 to take it off every day)
+  const BREAK_THRESHOLD_MINS = 360;         // unpaid break applies on a day with more than 6 hours
   const BREAK_MINS = 30;
-  const CONTRACT_HRS = 40;
-  const OT_ROUND_MINS = 15;                 // overtime rounded to the nearest 15 min (set to 0 for exact minutes)
-  const PRIVATE_ADDED_TO_NEXT_START = true; // next day's start = last finish + that day's private miles (false = last finish only)
-  const CARRY_KEY = 'ml_carry_odo';         // last week's closing mileage, used for Monday's start
+  const OT_ROUND_MINS = 15;                 // overtime rounded to nearest 15 min (set to 0 for exact minutes)
 
   const DEFAULT_SITE_NAMES = [
     "Buckingham Palace","St James's Palace","Clarence House","Kensington Palace","Windsor Castle","Frogmore House","Hampton Court Palace","Tower of London","Horse Guards","MOD Main Building Whitehall","Old War Office Whitehall","Wellington Barracks","Hyde Park Barracks","Regent's Park Barracks","Chelsea Barracks","Royal Hospital Chelsea","Victoria Barracks Windsor","Combermere Barracks Windsor","Royal Artillery Barracks Woolwich","Woolwich Garrison","Napier Lines Woolwich","Cavalry Barracks Hounslow","Armoury House (HAC)","King's Troop RHA Woolwich","Latchmere House","Kneller Hall Twickenham","Northwood Headquarters",
@@ -366,6 +370,70 @@
     }
   }
 
+  // ---------- Option 2: Live URL Hash Backup & Sync ----------
+  function encodeHashData(obj) {
+    try {
+      const jsonStr = JSON.stringify(obj);
+      const bytes = new TextEncoder().encode(jsonStr);
+      let bin = '';
+      bytes.forEach(b => bin += String.fromCharCode(b));
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    } catch (e) { return ''; }
+  }
+
+  function decodeHashData(hashStr) {
+    try {
+      let b64 = hashStr.replace(/^#/, '').replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return JSON.parse(new TextDecoder().decode(bytes));
+    } catch (e) { return null; }
+  }
+
+  let hashTimer = null;
+  function syncToUrlHash(stateObj) {
+    clearTimeout(hashTimer);
+    hashTimer = setTimeout(() => {
+      try {
+        const payload = {
+          s: stateObj,
+          c: readCustomSites(),
+          o: localStorage.getItem(CARRY_KEY) || ''
+        };
+        const encoded = encodeHashData(payload);
+        if (encoded) {
+          history.replaceState(null, '', '#' + encoded);
+        }
+      } catch (e) {}
+    }, 180);
+  }
+
+  function copySyncLink() {
+    saveState();
+    const payload = {
+      s: JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'),
+      c: readCustomSites(),
+      o: localStorage.getItem(CARRY_KEY) || ''
+    };
+    const encoded = encodeHashData(payload);
+    if (encoded) history.replaceState(null, '', '#' + encoded);
+    const url = window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copy_link_btn');
+        if (btn) {
+          const old = btn.textContent;
+          btn.textContent = 'Link Copied!';
+          setTimeout(() => btn.textContent = old, 1800);
+        }
+      }).catch(() => prompt("Copy your sync link:", url));
+    } else {
+      prompt("Copy your sync link:", url);
+    }
+  }
+
   function exportSaveFile() {
     try {
       const data = {
@@ -407,9 +475,10 @@
           localStorage.setItem('ml_hub_pin', parsed.pin);
           HUB_PIN = parsed.pin.trim();
         }
-        loadState();
+        loadState(true);
         renderSites();
         updateAllTotals();
+        saveState();
         alert("Save imported successfully!");
       } catch (err) {
         alert("Invalid backup file.");
@@ -490,7 +559,6 @@
     return false;
   }
 
-  // Minutes between a row's start and finish time (finish after midnight handled)
   function rowMins(sMins, fMins) {
     const endMins = fMins < sMins ? fMins + 1440 : fMins;
     return Math.max(0, endMins - sMins);
@@ -501,7 +569,6 @@
     return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`;
   }
 
-  // quiet = true skips the totals/save step (used when recalculating every row in a loop)
   function calcRowOvertime(rIdx, quiet) {
     const sRaw = document.getElementById(`r${rIdx}_c8`)?.value || '';
     const fRaw = document.getElementById(`r${rIdx}_c9`)?.value || '';
@@ -511,8 +578,6 @@
     if (!otEl) return;
 
     if (sMins === null || fMins === null) {
-      // A time was entered but isn't complete/valid: clear the stale overtime.
-      // If both times are empty, leave any manually typed overtime alone.
       if (sRaw || fRaw) otEl.value = '';
       if (!quiet) { updateAllTotals(); saveState(); }
       return;
@@ -626,95 +691,137 @@
     recalcAllOvertime();
   }
 
-  // ---------- Smart mileage ----------
-  // Every day follows:  Finish = Start + Work + Private.
-  //  - Type any two of Finish / Work / Private and the third is worked out.
-  //  - Start fills itself from the last finish above it (plus that day's private miles, see PRIVATE_ADDED_TO_NEXT_START).
-  //  - Boxes the app fills in ("auto") are recalculated whenever something changes. Boxes you typed are only
-  //    replaced if your two newest entries for that day contradict them.
-  let editSeq = 0;
+  // ---------- Smart Mileage Engine (Ripple + Way A Evening Adjustment) ----------
   const mEl = (i, f) => document.getElementById(`m_${f}_${i}`);
-  const mNum = el => { const v = parseFloat(el.value); return isNaN(v) ? NaN : v; };
-  const isTyped = el => el.value.trim() !== '' && el.dataset.auto !== '1';
-  const tOf = el => parseInt(el.dataset.t || '0', 10);
+  const mNum = el => { const v = parseFloat(el ? el.value : ''); return isNaN(v) ? NaN : v; };
+  const isTyped = el => el && el.value.trim() !== '' && el.dataset.auto !== '1';
   const r1 = v => Math.round(v * 10) / 10;
 
-  function setMile(el, v) {   // auto-fill a box (NaN clears it)
-    if (isNaN(v)) { el.value = ''; el.dataset.auto = ''; el.dataset.t = '0'; el.classList.remove('bad'); return; }
+  function setMile(el, v, asAuto = true) {
+    if (!el) return;
+    if (isNaN(v)) {
+      el.value = '';
+      el.dataset.auto = '';
+      el.classList.remove('bad');
+      return;
+    }
     el.value = r1(v);
-    el.dataset.auto = '1';
-    el.dataset.t = '0';
-    el.classList.toggle('bad', v < 0 && (el.id.indexOf('_work_') > -1 || el.id.indexOf('_priv_') > -1));
+    el.dataset.auto = asAuto ? '1' : '';
+    el.classList.toggle('bad', v < 0 && (el.id.includes('_work_') || el.id.includes('_priv_')));
   }
 
-  function solveDay(i, changed) {
+  function solveDay(i, changedField) {
     const S = mEl(i, 'start'), F = mEl(i, 'fin'), W = mEl(i, 'work'), P = mEl(i, 'priv');
 
-    // 1. Start of day comes from the last finish above it (or last week's closing mileage on Monday)
-    const inUse = [F, W, P].some(isTyped);
-    if (S.value.trim() === '' || S.dataset.auto === '1') {
-      let base = NaN;
-      if (inUse) {
-        for (let j = i - 1; j >= 0 && isNaN(base); j--) {
-          const pf = mNum(mEl(j, 'fin'));
-          if (!isNaN(pf)) base = pf + (PRIVATE_ADDED_TO_NEXT_START ? (mNum(mEl(j, 'priv')) || 0) : 0);
+    // 1. Immediate carry-over of Start Mileage from previous day's Finish
+    if (i > 0) {
+      let prevFin = NaN;
+      for (let j = i - 1; j >= 0; j--) {
+        const pf = mNum(mEl(j, 'fin'));
+        if (!isNaN(pf)) { prevFin = pf; break; }
+      }
+      if (!isNaN(prevFin)) {
+        if (!isTyped(S)) setMile(S, prevFin, true);
+      } else if (S.dataset.auto === '1') {
+        setMile(S, NaN);
+      }
+    } else if (i === 0 && !isTyped(S)) {
+      const carry = parseFloat(localStorage.getItem(CARRY_KEY));
+      if (!isNaN(carry)) setMile(S, carry, true);
+    }
+
+    const s = mNum(S), f = mNum(F), w = mNum(W), p = mNum(P);
+
+    if (isNaN(s)) return;
+
+    // 2. Balance Finish, Work, and Private for the day
+    if (changedField === 'start' || changedField === 'fin' || changedField === null) {
+      if (!isNaN(f) && f >= s) {
+        const total = f - s;
+        if (isTyped(P) && !isNaN(p)) {
+          setMile(W, total - p, true);
+        } else if (isTyped(W) && !isNaN(w)) {
+          const rem = total - w;
+          if (rem > 0 || P.value.trim() !== '') setMile(P, rem, true);
+        } else {
+          setMile(W, total, true);
+          if (P.dataset.auto === '1') setMile(P, NaN);
         }
-        if (isNaN(base) && i === 0) {
-          try { base = parseFloat(localStorage.getItem(CARRY_KEY)); } catch (e) {}
+      } else if (isNaN(f)) {
+        if (isTyped(W) && !isNaN(w)) {
+          setMile(F, s + w + (isNaN(p) ? 0 : p), true);
+        } else {
+          if (W.dataset.auto === '1') setMile(W, NaN);
+          if (P.dataset.auto === '1') setMile(P, NaN);
         }
       }
-      if (!isNaN(base)) setMile(S, base);
-      else if (S.dataset.auto === '1') setMile(S, NaN);
-    }
-
-    // 2. Work out whichever of Finish / Work / Private is missing
-    const s = mNum(S);
-    const typed = [F, W, P].filter(isTyped);
-    let target = null;
-
-    if (typed.length === 3) {
-      if (isNaN(s)) { setMile(S, mNum(F) - mNum(W) - mNum(P)); return; }
-      const off = Math.abs(s + mNum(W) + mNum(P) - mNum(F)) > 0.05;
-      if (off && changed) {
-        const others = typed.filter(e => e.id !== `m_${changed}_${i}`);
-        target = others.sort((a, b) => tOf(a) - tOf(b))[0];   // the oldest entry gives way
+    } else if (changedField === 'priv') {
+      const pVal = isNaN(p) ? 0 : p;
+      if (!isNaN(f) && F.dataset.auto !== '1') {
+        // Finish odometer is known: deduct Private from Total to get Work
+        setMile(W, (f - s) - pVal, true);
+      } else if (!isNaN(w)) {
+        // Work miles were entered without a fixed Finish: add Private on top to get Finish
+        setMile(F, s + w + pVal, true);
       }
-    } else if (typed.length === 2) {
-      target = [F, W, P].find(e => !isTyped(e));
-    } else if (typed.length === 1) {
-      if (typed[0] === W) target = F;
-      else if (typed[0] === F) target = W;
-      else if (!isNaN(mNum(W))) target = F;
+    } else if (changedField === 'work') {
+      if (!isNaN(w)) {
+        if (!isNaN(f) && F.dataset.auto !== '1') {
+          const rem = (f - s) - w;
+          if (rem !== 0 || P.value.trim() !== '') setMile(P, rem, true);
+        } else {
+          setMile(F, s + w + (isNaN(p) ? 0 : p), true);
+        }
+      } else if (!isNaN(f)) {
+        setMile(W, (f - s) - (isNaN(p) ? 0 : p), true);
+      }
     }
-
-    if (target && !isNaN(s)) {
-      const w = mNum(W) || 0, p = mNum(P) || 0, f = mNum(F);
-      if (target === F) setMile(F, s + w + p);
-      else if (target === W) setMile(W, f - s - p);
-      else setMile(P, f - s - w);
-    }
-  }
-
-  function solveAllMileage() {
-    for (let i = 0; i < 7; i++) solveDay(i, null);
-    recalcMileageTotals();
   }
 
   function recalcMileage(dayIdx, sourceField) {
     const el = mEl(dayIdx, sourceField);
     if (el) {
       el.classList.remove('bad');
-      el.dataset.auto = '';
-      if (el.value.trim() === '') {
-        el.dataset.t = '0';
-        if (sourceField !== 'start') {
-          ['fin', 'work', 'priv'].forEach(f => { const o = mEl(dayIdx, f); if (o.dataset.auto === '1') setMile(o, NaN); });
+      el.dataset.auto = ''; // User explicitly edited this box
+    }
+
+    // Way A: If user overwrites today's Start Mileage with a higher odometer reading than
+    // yesterday's Finish Mileage, automatically log the overnight difference as yesterday's
+    // evening Private Miles and update yesterday's Finish Mileage to match.
+    if (sourceField === 'start' && dayIdx > 0) {
+      const newStart = mNum(el);
+      let prevIdx = -1;
+      for (let j = dayIdx - 1; j >= 0; j--) {
+        if (!isNaN(mNum(mEl(j, 'start'))) || !isNaN(mNum(mEl(j, 'fin')))) {
+          prevIdx = j;
+          break;
         }
-      } else {
-        el.dataset.t = String(++editSeq);
+      }
+      if (prevIdx !== -1 && !isNaN(newStart)) {
+        const pS = mEl(prevIdx, 'start'), pF = mEl(prevIdx, 'fin'), pW = mEl(prevIdx, 'work'), pP = mEl(prevIdx, 'priv');
+        const psVal = mNum(pS), pfVal = mNum(pF);
+        if (!isNaN(psVal) && !isNaN(pfVal) && newStart >= psVal && newStart !== pfVal) {
+          // Lock yesterday's Work Miles so they don't change, and put the extra into yesterday's Private Miles
+          const currentWork = !isNaN(mNum(pW)) ? mNum(pW) : Math.max(0, pfVal - psVal - (mNum(pP) || 0));
+          const newPriv = newStart - psVal - currentWork;
+          if (newPriv >= 0) {
+            setMile(pW, currentWork, false);
+            setMile(pP, newPriv, false);
+            setMile(pF, newStart, false);
+            el.dataset.auto = '1'; // Keep today's Start linked to yesterday's updated Finish
+          }
+        }
       }
     }
-    for (let i = dayIdx; i < 7; i++) solveDay(i, i === dayIdx ? sourceField : null);
+
+    for (let i = dayIdx; i < 7; i++) {
+      solveDay(i, i === dayIdx ? sourceField : null);
+    }
+    recalcMileageTotals();
+  }
+
+  function solveAllMileage() {
+    for (let i = 0; i < 7; i++) solveDay(i, null);
     recalcMileageTotals();
   }
 
@@ -755,7 +862,7 @@
 
     // Total of all time entered, grouped by day, less a 30 min break on any day over 6h
     const dayMins = {};
-    let currentDay = '__nodate__', timedRows = 0;
+    let currentDay = '__nodate__';
     for (let r = 0; r < TOTAL_LOG_ROWS; r++) {
       const dateVal = (document.getElementById(`r${r}_c0`)?.value || '').trim();
       if (dateVal) currentDay = dateVal.slice(0, 5);
@@ -763,7 +870,6 @@
       const fMins = parseTimeMins(document.getElementById(`r${r}_c9`)?.value || '');
       if (sMins === null || fMins === null) continue;
       dayMins[currentDay] = (dayMins[currentDay] || 0) + rowMins(sMins, fMins);
-      timedRows++;
     }
     let totalWorkingMins = 0, breakMins = 0;
     Object.values(dayMins).forEach(m => {
@@ -805,7 +911,7 @@
     setText('pred_tasks', `${sitesLogged} site${sitesLogged === 1 ? '' : 's'} logged`);
     setText('cnt_total_hrs', fmtHrs(totalHoursVal));
     setText('pred_contract', `${timedDays} day${timedDays === 1 ? '' : 's'} · −${breakMins}m break`);
-    setText('cnt_oncall', onCallCount);   // safe: ignored if the element doesn't exist
+    setText('cnt_oncall', onCallCount);
   }
 
   function readCustomSites() {
@@ -851,6 +957,7 @@
     stored.push({ name, zone });
     localStorage.setItem(SITES_KEY, JSON.stringify(stored));
     renderSites();
+    saveState();
     nameEl.value = ''; zoneEl.value = '';
   }
 
@@ -858,6 +965,7 @@
     const stored = readCustomSites().filter(s => s.name.toLowerCase() !== siteName.toLowerCase());
     localStorage.setItem(SITES_KEY, JSON.stringify(stored));
     renderSites();
+    saveState();
   }
 
   function checkSiteZoneAutoFill(rIdx) {
@@ -875,29 +983,43 @@
 
   function saveState() {
     try {
-      const data = { inputs: {}, checks: {}, auto: [], seq: {} };
+      const data = { inputs: {}, checks: {}, auto: [] };
       document.querySelectorAll('input.cell-in, input.rate-input, select.rate-select').forEach(inp => {
         if (inp.id && inp.value !== '') {
           data.inputs[inp.id] = inp.value;
           if (inp.dataset.auto === '1') data.auto.push(inp.id);
-          const t = parseInt(inp.dataset.t || '0', 10);
-          if (t > 0) data.seq[inp.id] = t;
         }
       });
       document.querySelectorAll('.day-toggle').forEach(chk => { data.checks[chk.id] = chk.checked; });
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      syncToUrlHash(data);
     } catch (e) {}
   }
 
   function resetWeekly() {
     document.querySelectorAll('input.weekly').forEach(inp => {
-      inp.value = ''; inp.dataset.auto = ''; inp.dataset.t = '0'; inp.classList.remove('bad');
+      inp.value = ''; inp.dataset.auto = ''; inp.classList.remove('bad');
     });
     document.querySelectorAll('.day-toggle').forEach(chk => chk.checked = false);
   }
 
-  function loadState() {
+  function loadState(skipHash = false) {
     try {
+      // 1. Check if the URL hash has a backup snapshot first
+      if (!skipHash && window.location.hash && window.location.hash.length > 2) {
+        const fromHash = decodeHashData(window.location.hash);
+        if (fromHash && fromHash.s) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(fromHash.s));
+          if (Array.isArray(fromHash.c) && fromHash.c.length > 0) {
+            localStorage.setItem(SITES_KEY, JSON.stringify(fromHash.c));
+          }
+          if (fromHash.o) {
+            localStorage.setItem(CARRY_KEY, String(fromHash.o));
+          }
+        }
+      }
+
+      // 2. Load from localStorage
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return;
       const data = JSON.parse(raw);
@@ -905,10 +1027,6 @@
       if (data.inputs) Object.keys(data.inputs).forEach(id => { const el = document.getElementById(id); if (el) el.value = data.inputs[id]; });
       if (data.checks) Object.keys(data.checks).forEach(id => { const el = document.getElementById(id); if (el) el.checked = !!data.checks[id]; });
       (data.auto || []).forEach(id => { const el = document.getElementById(id); if (el) el.dataset.auto = '1'; });
-      Object.keys(data.seq || {}).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.dataset.t = String(data.seq[id]); editSeq = Math.max(editSeq, data.seq[id]); }
-      });
       solveAllMileage();
       updateAllTotals();
     } catch (e) {}
@@ -916,17 +1034,24 @@
 
   function clearWeeklyEntries() {
     if (!confirm('Start a new week? Your Name, Vehicle Reg, Team Leader, Hourly Rate, Multiplier and Saved Sites will stay saved.')) return;
-    // remember where the car finished, so next Monday's start fills itself
-    let lastBase = NaN;
-    for (let j = 6; j >= 0 && isNaN(lastBase); j--) {
+    let lastFin = NaN;
+    for (let j = 6; j >= 0 && isNaN(lastFin); j--) {
       const f = mNum(mEl(j, 'fin'));
-      if (!isNaN(f)) lastBase = f + (PRIVATE_ADDED_TO_NEXT_START ? (mNum(mEl(j, 'priv')) || 0) : 0);
+      if (!isNaN(f)) lastFin = f;
     }
-    if (!isNaN(lastBase)) { try { localStorage.setItem(CARRY_KEY, String(r1(lastBase))); } catch (e) {} }
+    if (!isNaN(lastFin)) {
+      try { localStorage.setItem(CARRY_KEY, String(r1(lastFin))); } catch (e) {}
+    }
     resetWeekly();
+    solveAllMileage();
     updateAllTotals();
     saveState();
   }
+
+  window.addEventListener('hashchange', () => {
+    loadState(false);
+    renderSites();
+  });
 
   document.addEventListener('input', e => {
     if (e.target && e.target.id === 'pin_box') return;
@@ -937,8 +1062,8 @@
   window.addEventListener('DOMContentLoaded', () => {
     cleanStrayTextNodes();
     buildLogRows();
+    loadState(false);
     renderSites();
-    loadState();
     if (document.getElementById('ot_rate').value === '15.00') document.getElementById('ot_rate').value = '15.66';
     updateAllTotals();
     if (localStorage.getItem(AUTH_KEY) === '1') {
@@ -952,3 +1077,4 @@
 </script>
 </body>
 </html>
+
